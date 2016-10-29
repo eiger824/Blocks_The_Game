@@ -248,6 +248,8 @@ namespace mynamespace {
     for (unsigned i=0; i < MAX_COLS; ++i) {
       for (unsigned j=0; j< MAX_ROWS; ++j) {
 	if (!isPosLocked(i,j)) { //see if position is free
+
+	  
 	  if (checkPos(j,i)) { //position indicated by m_current(_B), THAT color is different
 	    if (target.load(m_current_player)) {
 	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(j)->layout())->itemAt(i)->widget())->setPixmap(target);
@@ -257,6 +259,10 @@ namespace mynamespace {
 	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(j)->layout())->itemAt(i)->widget())->setPixmap(target);
 	    }
 	  }
+
+
+
+	  
 	} //end of if (!isPosLocked(i,j))
       }
     }
@@ -360,7 +366,8 @@ namespace mynamespace {
   bool MyGui::isPosLocked(unsigned int x, unsigned int y) {
     if (m_locked_pos.contains(qMakePair(x,y)) ||
 	m_locked_pos_B.contains(qMakePair(x,y))) {
-      info(0, "Returning true, position found");
+      info(0, "Returning true, position found: (" +
+	   QString::number(x) + "," + QString::number(y) + ")");
       return true;
     }
     else return false;
@@ -377,7 +384,7 @@ namespace mynamespace {
   }
 
   void MyGui::printLocked() {
-    std::cout << "\tYELLOW PLAYER: \n";
+    std::cout << "------------------------\n\tYELLOW PLAYER: \n";
     for (unsigned i=0; i<m_locked_pos.size(); ++i) {
       std::cout << "\t(" << m_locked_pos.at(i).first << ","
 		<< m_locked_pos.at(i).second << ")" << std::endl;
@@ -387,5 +394,6 @@ namespace mynamespace {
       std::cout << "\t(" << m_locked_pos_B.at(j).first << ","
 		<< m_locked_pos_B.at(j).second << ")" << std::endl;
     }
+    std::cout <<"------------------------\n";
   }
 } //mynamespace
