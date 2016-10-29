@@ -6,8 +6,7 @@
 namespace mynamespace {
 
   MyGui::MyGui(QWidget* parent): QWidget(parent),
-				 m_started(false),
-				 m_move(true) {
+				 m_started(false) {
     setFixedSize(600,600);
     setStyleSheet("background-color: grey;");
     
@@ -184,7 +183,7 @@ namespace mynamespace {
     } else if (event->key() == ESC) {
       //save locket pos of current player to list
       save2list();
-      info(0, "Locking position: " + currentPair2String());
+      info(0, "Locking position (" + m_current_player + "): " + currentPair2String());
       switchPlayer();
     }
   }
@@ -195,6 +194,10 @@ namespace mynamespace {
     } else {
       m_locked_pos_B << m_current_B;
     }
+    printLocked();
+    info(0, "Nr locked positions: "
+	 + QString::number(m_locked_pos.size()
+			   + m_locked_pos_B.size()));
   }
 
   void MyGui::updateCurrentCol(int opt) {
@@ -232,7 +235,7 @@ namespace mynamespace {
 	return true;
       } else return false;
     } else {
-       if (m_current_B.first == x &&
+      if (m_current_B.first == x &&
 	  m_current_B.second == y) {
 	return true;
       } else return false;
@@ -244,9 +247,8 @@ namespace mynamespace {
     QPixmap target;
     for (unsigned i=0; i < MAX_COLS; ++i) {
       for (unsigned j=0; j< MAX_ROWS; ++j) {
-	if (!m_locked_pos.contains(qMakePair(i,j)) &&
-	    !m_locked_pos_B.contains(qMakePair(i,j))) {
-	  if (checkPos(j,i)) { //position indicated by m_current
+	if (!isPosLocked(i,j)) { //see if position is free
+	  if (checkPos(j,i)) { //position indicated by m_current(_B), THAT color is different
 	    if (target.load(m_current_player)) {
 	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(j)->layout())->itemAt(i)->widget())->setPixmap(target);
 	    }
@@ -255,7 +257,7 @@ namespace mynamespace {
 	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(j)->layout())->itemAt(i)->widget())->setPixmap(target);
 	    }
 	  }
-	}
+	} //end of if (!isPosLocked(i,j))
       }
     }
   }
@@ -268,17 +270,37 @@ namespace mynamespace {
   bool MyGui::canMove(const int key) {
     switch (key) {
     case LEFT:
-      if (m_current.second == 0) return false;
-      else return true;
+      if (m_current_player == YELLOW) {
+	if (m_current.second == 0) return false;
+	else return true;
+      } else {
+	if (m_current_B.second == 0) return false;
+	else return true;
+      }
     case RIGHT:
-      if (m_current.second == MAX_COLS-1) return false;
-      else return true;
+      if (m_current_player == YELLOW) {
+	if (m_current.second == MAX_COLS-1) return false;
+	else return true;
+      } else {
+	if (m_current_B.second == MAX_COLS-1) return false;
+	else return true;
+      }
     case UP:
-      if (m_current.first == 0) return false;
-      else return true;
+      if (m_current_player == YELLOW) {
+	if (m_current.first == 0) return false;
+	else return true;
+      } else {
+	if (m_current_B.first == 0) return false;
+	else return true;
+      }    
     case DOWN:
-      if (m_current.first == MAX_ROWS-1) return false;
-      else return true;
+      if (m_current_player == YELLOW) {
+	if (m_current.first == MAX_ROWS-1) return false;
+	else return true;
+      } else {
+	if (m_current_B.first == MAX_ROWS-1) return false;
+	else return true;
+      }
     default:
       return false;
     }
@@ -323,19 +345,47 @@ namespace mynamespace {
   }
 
   void MyGui::switchPlayer() {
-    info(0, "Switching player\n");
-    m_move = !m_move;
-    if (m_current_player == YELLOW) m_current_player = RED;
-    else m_current_player = YELLOW;
+    if (m_current_player == YELLOW) {
+      m_current_player = RED;
+      m_current.first = 0;
+      m_current.second = 0;
+    } else {
+      m_current_player = YELLOW;
+      m_current_B.first = 0;
+      m_current_B.second = 0;
+    }
+    info(0, "Switching player: " + m_current_player);
+  }
+
+  bool MyGui::isPosLocked(unsigned int x, unsigned int y) {
+    if (m_locked_pos.contains(qMakePair(x,y)) ||
+	m_locked_pos_B.contains(qMakePair(x,y))) {
+      info(0, "Returning true, position found");
+      return true;
+    }
+    else return false;
   }
 
   bool MyGui::checkIfWin() {
     /*
-     Three "scenarios" must be tested:
+      Three "scenarios" must be tested:
       1.) column fill?
       2.) row fill?
       3.) diagonal fill?
     */
     return true;
+  }
+
+  void MyGui::printLocked() {
+    std::cout << "\tYELLOW PLAYER: \n";
+    for (unsigned i=0; i<m_locked_pos.size(); ++i) {
+      std::cout << "\t(" << m_locked_pos.at(i).first << ","
+		<< m_locked_pos.at(i).second << ")" << std::endl;
+    }
+    std::cout << "\tRED PLAYER: \n";
+    for (unsigned j=0; j<m_locked_pos_B.size();++j) {
+      std::cout << "\t(" << m_locked_pos_B.at(j).first << ","
+		<< m_locked_pos_B.at(j).second << ")" << std::endl;
+    }
   }
 } //mynamespace

@@ -37,6 +37,8 @@ namespace mynamespace {
     void updateCurrentCol(int opt);
     void updateCurrentRow(int opt);
     bool checkPos(unsigned int x, unsigned int y);
+    bool isPosLocked(unsigned int x, unsigned int y);
+    void printLocked();
   private:
     QVBoxLayout *m_main_layout;
     QHBoxLayout *m_first;
@@ -48,7 +50,6 @@ namespace mynamespace {
     bool m_started;
     QTimer *m_timer;
     QLabel *m_block;
-    bool m_move;
     QString m_current_player;
     QList<QPair<unsigned int,unsigned int> > m_locked_pos;
     QList<QPair<unsigned int,unsigned int> > m_locked_pos_B;
