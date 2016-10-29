@@ -1,0 +1,9 @@
+# Blocks_The_Game
+Simple implementation of the classic 4 in a row game using Qt 4 libraries.
+
+As always:
+	1.) mkdir build && cd build
+	2.) cmake ..
+	3.) make
+
+Enjoy! :D
