@@ -6,29 +6,39 @@
 
 namespace mynamespace {
 
-  MyGui::MyGui(QWidget* parent): QWidget(parent),
-				 m_started(false) {
+  MyGui::MyGui(bool debug,
+	       bool machine,
+	       bool timer,
+	       QWidget* parent): QWidget(parent),
+				 m_started(false),
+				 m_debug(debug),
+				 m_machine(machine),
+				 m_timer_enabled(timer),
+				 m_cnt(0),
+				 m_cnt_B(0),
+				 m_rem_secs(10) {
     setFixedSize(600,600);
     setStyleSheet("background-color: grey;");
-    
+
     m_main_layout = new QVBoxLayout;
     m_main_layout->setAlignment(Qt::AlignCenter);
 
+    m_intro = new QVBoxLayout;
     m_first = new QHBoxLayout;
     m_second = new QHBoxLayout;
     m_third = new QHBoxLayout;
     m_fourth = new QHBoxLayout;
 
     QPixmap blockimage;
-    QLabel *block1 = new QLabel;
-    QLabel *block2 = new QLabel;
-    QLabel *block3 = new QLabel;
-    QLabel *block4 = new QLabel;
-    QLabel *block5 = new QLabel;
-    QLabel *block6 = new QLabel;
-    QLabel *block7 = new QLabel;
-    QLabel *block8 = new QLabel;
-    QLabel *block9 = new QLabel;
+    QLabel *block1  = new QLabel;
+    QLabel *block2  = new QLabel;
+    QLabel *block3  = new QLabel;
+    QLabel *block4  = new QLabel;
+    QLabel *block5  = new QLabel;
+    QLabel *block6  = new QLabel;
+    QLabel *block7  = new QLabel;
+    QLabel *block8  = new QLabel;
+    QLabel *block9  = new QLabel;
     QLabel *block10 = new QLabel;
     QLabel *block11 = new QLabel;
     QLabel *block12 = new QLabel;
@@ -36,6 +46,22 @@ namespace mynamespace {
     QLabel *block14 = new QLabel;
     QLabel *block15 = new QLabel;
     QLabel *block16 = new QLabel;
+
+    m_info = "Move count: ";
+    m_secs = "Remaning: 00:";
+    m_move_count = new QLabel(m_info + QString::number(m_cnt));
+    m_move_count->setStyleSheet("background-color: yellow; font: arial 8px; color: black;");
+    m_move_count_B = new QLabel(m_info + QString::number(m_cnt_B));
+    m_move_count_B->setStyleSheet("background-color: red; font: arial 8px; color: black;");
+    m_restart = new QPushButton("Restart");
+    m_restart->setFocusPolicy(Qt::NoFocus);
+    m_restart->setStyleSheet("background-color: white; color: black; font: arial 8px; margin: 2px solid black;");
+    m_restart->setFixedWidth(120);
+    connect(m_restart, SIGNAL(clicked()), this, SLOT(resetGame()));
+    m_remaining = new QLabel(m_secs + QString::number(m_rem_secs));
+    m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
+    m_remaining->setFixedHeight(50);
+    m_remaining->setAlignment(Qt::AlignCenter);
     
     if (blockimage.load(YELLOW)) {
       block2->setPixmap(blockimage);
@@ -127,8 +153,16 @@ namespace mynamespace {
     m_fourth->addWidget(block14);
     m_fourth->addWidget(block15);
     m_fourth->addWidget(block16);
+
+    QHBoxLayout *temp = new QHBoxLayout;
+    temp->addWidget(m_move_count);
+    temp->addWidget(m_move_count_B);
+    m_intro->addLayout(temp);
+    m_intro->addWidget(m_remaining);
+    m_intro->addWidget(m_restart);
     
     //add widgets to layout
+    m_main_layout->addLayout(m_intro);
     m_main_layout->addLayout(m_first);
     m_main_layout->addLayout(m_second);
     m_main_layout->addLayout(m_third);
@@ -141,10 +175,12 @@ namespace mynamespace {
     m_current_player = YELLOW;
     //timer
     m_timer = new QTimer();
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(timerOut()));
-    //m_timer->start(10000);
-    info(0, "Timer started.");
-
+    if (m_timer_enabled) {
+      connect(m_timer, SIGNAL(timeout()), this, SLOT(timerOut()));
+      m_timer->start(1000);
+      info(0, "Timer started.");
+    }
+    setWindowTitle(tr("Blocks 1.1 - Santi Pagola 2016"));
     show();
   }
   MyGui::~MyGui() {
@@ -182,13 +218,26 @@ namespace mynamespace {
 	updateLabels();
       }
     } else if (event->key() == ESC) {
+      //stop timer
+      if (m_timer_enabled) {
+	if (m_timer->isActive()) {
+	  m_timer->stop();
+	}
+      }
       //save locket pos of current player to list
       if (save2list()) {
+	if (m_current_player == YELLOW) {
+	  ++m_cnt;
+	  m_move_count->setText(m_info + QString::number(m_cnt));
+	} else {
+	  ++m_cnt_B;
+	  m_move_count_B->setText(m_info + QString::number(m_cnt_B));
+	} 
 	info(0, "Locking position (" + m_current_player + "): " + currentPair2String());
 	//check if win
 	if (checkIfWin()) {
 	  QMessageBox::information(this, m_current_player + " wins!!",
-				   "close this dialog to start playing again.");
+				   "Close this dialog to start playing again.");
 	  resetGame();
 	} else {
 	  //switch player and reset position
@@ -209,6 +258,7 @@ namespace mynamespace {
 			       + m_locked_pos_B.size()));
 	return true;
       } else {
+	QMessageBox::information(this, "Wrong move", "Position is already locked.\nSelect another free position.");
 	info(1, "Position exists!!");
 	return false;
       }
@@ -223,7 +273,7 @@ namespace mynamespace {
 			       + m_locked_pos_B.size()));
 	return true;
       } else {
-	info(1, "Position exists!!");
+	info(1, "Position locked.");
 	return false;
       }
     }
@@ -274,10 +324,10 @@ namespace mynamespace {
   void MyGui::updateLabels() {
     //switch labels
     QPixmap target;
-    for (unsigned i=0; i < MAX_ROWS; ++i) {
+    for (unsigned i=1; i <= MAX_ROWS; ++i) {
       for (unsigned j=0; j< MAX_COLS; ++j) {
-	if (!isPosLocked(i,j)) { //see if position is free
-	  if (checkPos(i,j)) { //position indicated by m_current(_B), THAT color is different
+	if (!isPosLocked(i-1,j)) { //see if position is free
+	  if (checkPos(i-1,j)) { //position indicated by m_current(_B), THAT color is different
 	    if (target.load(m_current_player)) {
 	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
 	    }
@@ -292,8 +342,20 @@ namespace mynamespace {
   }
 
   void MyGui::timerOut() {
-    info(0, "Timeout");
-    switchPlayer();
+    if (m_rem_secs == 1) {
+      info(0, "Timeout");
+      switchPlayer();
+      //reset label
+      m_rem_secs = 10;
+      m_remaining->setText(m_secs + QString::number(m_rem_secs));
+      m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
+    } else {
+      --m_rem_secs;
+      m_remaining->setText(m_secs + QString::number(m_rem_secs));
+      if (m_rem_secs < 5) {
+	m_remaining->setStyleSheet("background-color: white; color: red; font: arial 12px;");
+      }
+    }
   }
 
   bool MyGui::canMove(const int key) {
@@ -336,6 +398,7 @@ namespace mynamespace {
   }
   
   void MyGui::info(const int code, const QString& msg) {
+    if (!m_debug) return;
     if (code == 0)
       std::cout << msg.toStdString() << std::endl;
     else
@@ -343,6 +406,7 @@ namespace mynamespace {
   }
 
   void MyGui::info() {
+    if (!m_debug) return;
     if (m_current_player == YELLOW)
       std::cout << "Yellow: (" << m_current.first << "," <<
 	m_current.second << ")" << std::endl;
@@ -384,6 +448,12 @@ namespace mynamespace {
       m_current_B.second = 0;
     }
     info(0, "Switching player: " + m_current_player);
+    if (m_timer_enabled) {
+      m_rem_secs = 10;
+      m_remaining->setText(m_secs + QString::number(m_rem_secs));
+      m_timer->start(1000);
+      info(0, "Timer started.");
+    }
   }
 
   bool MyGui::isPosLocked(unsigned int x, unsigned int y) {
@@ -503,6 +573,7 @@ namespace mynamespace {
   }
 
   void MyGui::printLocked() {
+    if (!m_debug) return;
     std::cout << "------------------------\n\tYELLOW PLAYER: \n";
     for (unsigned i=0; i<m_locked_pos.size(); ++i) {
       std::cout << "\t(" << m_locked_pos.at(i).first << ","
@@ -517,8 +588,9 @@ namespace mynamespace {
   }
 
   void MyGui::resetGame() {
+    info(0, "Resetting game.");
     QPixmap target;
-    for (unsigned i=0; i < MAX_ROWS; ++i) {
+    for (unsigned i=2; i <= MAX_ROWS; ++i) {
       for (unsigned j=0; j< MAX_COLS; ++j) {
 	if (target.load(QString::fromStdString("blue.png"))) {
 	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);

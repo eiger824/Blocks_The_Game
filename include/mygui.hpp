@@ -9,6 +9,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QPair>
+#include <QPushButton>
 
 namespace mynamespace {
 
@@ -18,12 +19,16 @@ namespace mynamespace {
   class MyGui : public QWidget {
     Q_OBJECT
   public:
-    explicit MyGui(QWidget* parent=0);
+    explicit MyGui(bool debug = false,
+		   bool machine = false,
+		   bool timer_enabled = false,
+		   QWidget* parent=0);
     ~MyGui();
   protected:
     void keyPressEvent(QKeyEvent *event);
   private slots:
     void timerOut();
+    void resetGame();
   private:
     void info(const int code, const QString& msg);
     void info();
@@ -31,7 +36,6 @@ namespace mynamespace {
     bool canMove(const int key);
     void updateLabels();
     void machinePlays();
-    void switchPlayer();
     bool checkIfWin();
     bool save2list();
     void updateCurrentCol(int opt);
@@ -40,9 +44,10 @@ namespace mynamespace {
     bool isPosLocked(unsigned int x, unsigned int y);
     void printLocked();
     bool checkDiag();
-    void resetGame();
+    void switchPlayer();
   private:
     QVBoxLayout *m_main_layout;
+    QVBoxLayout *m_intro;
     QHBoxLayout *m_first;
     QHBoxLayout *m_second;
     QHBoxLayout *m_third;
@@ -55,6 +60,18 @@ namespace mynamespace {
     QString m_current_player;
     QList<QPair<unsigned int,unsigned int> > m_locked_pos;
     QList<QPair<unsigned int,unsigned int> > m_locked_pos_B;
+    bool m_debug;
+    QLabel *m_move_count;
+    QLabel *m_move_count_B;
+    QString m_info;
+    QString m_secs;
+    unsigned int m_cnt;
+    unsigned int m_cnt_B;
+    unsigned int m_rem_secs;
+    QPushButton *m_restart;
+    bool m_machine;
+    bool m_timer_enabled;
+    QLabel *m_remaining;
   };
   
 } //mynamespace
