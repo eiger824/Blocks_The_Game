@@ -16,7 +16,9 @@ namespace mynamespace {
 				 m_timer_enabled(timer),
 				 m_cnt(0),
 				 m_cnt_B(0),
-				 m_rem_secs(10) {
+				 m_rem_secs(10),
+				 m_wins(0),
+				 m_wins_B(0) {
     setFixedSize(600,600);
     setStyleSheet("background-color: grey;");
 
@@ -47,6 +49,8 @@ namespace mynamespace {
     QLabel *block15 = new QLabel;
     QLabel *block16 = new QLabel;
 
+
+    /****************** INFO PANEL  ********************/
     m_info = "Move count: ";
     m_secs = "Remaning: 00:";
     m_move_count = new QLabel(m_info + QString::number(m_cnt));
@@ -72,6 +76,11 @@ namespace mynamespace {
       m_timer_opt->setChecked(true);
     connect(m_debug_opt, SIGNAL(stateChanged(int)), this, SLOT(enableDebug(int)));
     connect(m_timer_opt, SIGNAL(stateChanged(int)), this, SLOT(enableTimer(int)));
+    m_scores = new QLabel("Scores\n0\t-\t0");
+    m_scores->setStyleSheet("color: white; font: arial 70px;");
+    m_scores->setFixedHeight(100);
+    m_scores->setAlignment(Qt::AlignCenter);
+    /***************************************************/
     
     if (blockimage.load(YELLOW)) {
       block2->setPixmap(blockimage);
@@ -167,6 +176,7 @@ namespace mynamespace {
     QHBoxLayout *temp = new QHBoxLayout;
     temp->addWidget(m_move_count);
     temp->addWidget(m_move_count_B);
+    m_intro->addWidget(m_scores);
     m_intro->addLayout(temp);
     m_intro->addWidget(m_debug_opt);
     m_intro->addWidget(m_timer_opt);
@@ -248,6 +258,14 @@ namespace mynamespace {
 	if (checkIfWin()) {
 	  QMessageBox::information(this, m_current_player + " wins!!",
 				   "Close this dialog to start playing again.");
+	  if (m_current_player == YELLOW) {
+	    ++m_wins;
+	  } else {
+	    ++m_wins_B;
+	  }
+	  //update scores label
+	  m_scores->setText("Scores\n" + QString::number(m_wins) +
+			    "-" + QString::number(m_wins_B));
 	  resetGame();
 	} else {
 	  //switch player and reset position

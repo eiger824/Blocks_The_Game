@@ -77,6 +77,9 @@ namespace mynamespace {
     QLabel *m_remaining;
     QCheckBox *m_debug_opt;
     QCheckBox *m_timer_opt;
+    QLabel *m_scores;
+    unsigned m_wins;
+    unsigned m_wins_B;
   };
   
 } //mynamespace
