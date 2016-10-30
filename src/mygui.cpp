@@ -245,18 +245,18 @@ namespace mynamespace {
   void MyGui::updateLabels() {
     //switch labels
     QPixmap target;
-    for (unsigned i=0; i < MAX_COLS; ++i) {
-      for (unsigned j=0; j< MAX_ROWS; ++j) {
+    for (unsigned i=0; i < MAX_ROWS; ++i) {
+      for (unsigned j=0; j< MAX_COLS; ++j) {
 	if (!isPosLocked(i,j)) { //see if position is free
 
 	  
-	  if (checkPos(j,i)) { //position indicated by m_current(_B), THAT color is different
+	  if (checkPos(i,j)) { //position indicated by m_current(_B), THAT color is different
 	    if (target.load(m_current_player)) {
-	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(j)->layout())->itemAt(i)->widget())->setPixmap(target);
+	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
 	    }
 	  } else {
 	    if (target.load(QString::fromStdString("blue.png"))) {
-	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(j)->layout())->itemAt(i)->widget())->setPixmap(target);
+	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
 	    }
 	  }
 
