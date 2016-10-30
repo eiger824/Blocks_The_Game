@@ -11,6 +11,7 @@
 #include <QPair>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QTextEdit>
 
 namespace mynamespace {
 
@@ -23,6 +24,8 @@ namespace mynamespace {
     explicit MyGui(bool debug = false,
 		   bool machine = false,
 		   bool timer_enabled = false,
+		   QString player = "",
+		   QString player_B = "",
 		   QWidget* parent=0);
     ~MyGui();
   protected:
@@ -80,6 +83,10 @@ namespace mynamespace {
     QLabel *m_scores;
     unsigned m_wins;
     unsigned m_wins_B;
+    QLabel *m_player;
+    QLabel *m_player_B;
+    QTextEdit *m_player_edit;
+    QTextEdit *m_player_edit_B;
   };
   
 } //mynamespace

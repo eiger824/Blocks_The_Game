@@ -9,6 +9,8 @@ namespace mynamespace {
   MyGui::MyGui(bool debug,
 	       bool machine,
 	       bool timer,
+	       QString player,
+	       QString player_B,
 	       QWidget* parent): QWidget(parent),
 				 m_started(false),
 				 m_debug(debug),
@@ -19,7 +21,7 @@ namespace mynamespace {
 				 m_rem_secs(10),
 				 m_wins(0),
 				 m_wins_B(0) {
-    setFixedSize(600,600);
+    setFixedSize(600,700);
     setStyleSheet("background-color: grey;");
 
     m_main_layout = new QVBoxLayout;
@@ -55,8 +57,10 @@ namespace mynamespace {
     m_secs = "Remaning: 00:";
     m_move_count = new QLabel(m_info + QString::number(m_cnt));
     m_move_count->setStyleSheet("background-color: yellow; font: arial 8px; color: black;");
+    m_move_count->setAlignment(Qt::AlignCenter);
     m_move_count_B = new QLabel(m_info + QString::number(m_cnt_B));
     m_move_count_B->setStyleSheet("background-color: red; font: arial 8px; color: black;");
+    m_move_count_B->setAlignment(Qt::AlignCenter);
     m_restart = new QPushButton("Start");
     m_restart->setFocusPolicy(Qt::NoFocus);
     m_restart->setStyleSheet("background-color: white; color: black; font: arial 8px; margin: 2px solid black;");
@@ -80,6 +84,20 @@ namespace mynamespace {
     m_scores->setStyleSheet("color: white; font: arial 70px;");
     m_scores->setFixedHeight(100);
     m_scores->setAlignment(Qt::AlignCenter);
+    m_player = new QLabel("Player 1:");
+    m_player_B = new QLabel("Player 2:");
+    m_player_edit = new QTextEdit();
+    m_player_edit->setFixedHeight(30);
+    m_player_edit->setStyleSheet("background-color: white; color: black;");
+    m_player_edit->setTabChangesFocus(true);
+    if (!player.isEmpty())
+      m_player_edit->setText(player);
+    m_player_edit_B = new QTextEdit();
+    m_player_edit_B->setFixedHeight(30);
+    m_player_edit_B->setStyleSheet("background-color: white; color: black;");
+    m_player_edit_B->setTabChangesFocus(true);
+    if (!player_B.isEmpty())
+      m_player_edit_B->setText(player_B);
     /***************************************************/
     
     if (blockimage.load(YELLOW)) {
@@ -174,9 +192,17 @@ namespace mynamespace {
     m_fourth->addWidget(block16);
 
     QHBoxLayout *temp = new QHBoxLayout;
+    QHBoxLayout *names = new QHBoxLayout;
+    QHBoxLayout *names_B = new QHBoxLayout;
+    names->addWidget(m_player);
+    names->addWidget(m_player_edit);
+    names_B->addWidget(m_player_B);
+    names_B->addWidget(m_player_edit_B);
     temp->addWidget(m_move_count);
     temp->addWidget(m_move_count_B);
     m_intro->addWidget(m_scores);
+    m_intro->addLayout(names);
+    m_intro->addLayout(names_B);
     m_intro->addLayout(temp);
     m_intro->addWidget(m_debug_opt);
     m_intro->addWidget(m_timer_opt);
@@ -642,6 +668,9 @@ namespace mynamespace {
       info(0, "timer started");
       m_timer->start(1000);
     }
+    //remove focus to edits
+    m_player_edit->setEnabled(false);
+    m_player_edit_B->setEnabled(false);
   }
 
   void MyGui::enableDebug(int opt) {

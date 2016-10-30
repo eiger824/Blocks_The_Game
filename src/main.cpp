@@ -1,6 +1,8 @@
 #include <iostream>
 #include <QApplication>
+#include <QString>
 #include <string.h>
+#include <getopt.h>
 #include "mygui.hpp"
 
 using namespace mynamespace;
@@ -8,11 +10,14 @@ using namespace mynamespace;
 int help(int code) {
   std::cout << "BLOCKS - The Game!\n";
   std::cout << "Developed by Santiago Pagola in Oct. 2016\n";
-  std::cout << "USAGE:\n";
-  std::cout << "\t-d\tEnable debug messages\n";
-  std::cout << "\t-h\tPrint this help and exit\n";
-  std::cout << "\t-m\tPlay agains the machine (let's have fun!)\n";
-  std::cout << "\t-t\tTimer enabled (10 sec.)\n";
+  std::cout << "USAGE: blocks [OPTIONS]\n";
+  std::cout << "OPTIONS:\n";
+  std::cout << "-a <name>\tFirst player's name\n";
+  std::cout << "-b <name>\tSecond player's name\n";
+  std::cout << "-d\t\tEnable debug messages\n";
+  std::cout << "-h\t\tPrint this help and exit\n";
+  std::cout << "-m\t\tPlay against the machine (let's have fun!)\n";
+  std::cout << "-t\t\tTimer enabled (10 sec.)\n";
   if (code == 0) {
     return 0;
   } else {
@@ -29,23 +34,38 @@ int main(int argc, char* argv[]) {
     bool debug = false;
     bool machine = false;
     bool timer = false;
-    for (unsigned i=1; i < argc; ++i) {
-      if (!strcmp(argv[i],"-d")) {
+    QString player,player_B;
+    int c;
+    while ((c = getopt(argc, argv, "dhmta:b:")) != -1) {
+      switch (c) {
+      case 'a':
+	player = QString::fromStdString(optarg);
+	break;
+      case 'b':
+	player_B = QString::fromStdString(optarg);
+	break;
+      case 'd':
 	debug = true;
-      } else if (!strcmp(argv[i],"-h")) {
+	break;
+      case 'h':
 	return help(0);
-      } else if (!strcmp(argv[i],"-m")) {
+      case 'm':
 	machine = true;
-      } else if (!strcmp(argv[i],"-t")) {
+	break;
+      case 't':
 	timer = true;
-      } else {
+	break;
+      default:
 	std::cerr << "Wrong arg. Returning\n";      
 	return help(1);
       }
     }
+   
     gui = new MyGui(debug,
 		    machine,
-		    timer);
+		    timer,
+		    player,
+		    player_B);
   }
   return app.exec();
 }
