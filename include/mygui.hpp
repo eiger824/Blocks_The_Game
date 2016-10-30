@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QPair>
 #include <QPushButton>
+#include <QCheckBox>
 
 namespace mynamespace {
 
@@ -29,6 +30,8 @@ namespace mynamespace {
   private slots:
     void timerOut();
     void resetGame();
+    void enableDebug(int opt);
+    void enableTimer(int opt);
   private:
     void info(const int code, const QString& msg);
     void info();
@@ -72,6 +75,8 @@ namespace mynamespace {
     bool m_machine;
     bool m_timer_enabled;
     QLabel *m_remaining;
+    QCheckBox *m_debug_opt;
+    QCheckBox *m_timer_opt;
   };
   
 } //mynamespace

@@ -53,7 +53,7 @@ namespace mynamespace {
     m_move_count->setStyleSheet("background-color: yellow; font: arial 8px; color: black;");
     m_move_count_B = new QLabel(m_info + QString::number(m_cnt_B));
     m_move_count_B->setStyleSheet("background-color: red; font: arial 8px; color: black;");
-    m_restart = new QPushButton("Restart");
+    m_restart = new QPushButton("Start");
     m_restart->setFocusPolicy(Qt::NoFocus);
     m_restart->setStyleSheet("background-color: white; color: black; font: arial 8px; margin: 2px solid black;");
     m_restart->setFixedWidth(120);
@@ -62,6 +62,16 @@ namespace mynamespace {
     m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
     m_remaining->setFixedHeight(50);
     m_remaining->setAlignment(Qt::AlignCenter);
+    m_debug_opt = new QCheckBox("Debug enabled");
+    m_debug_opt->setFocusPolicy(Qt::NoFocus);
+    if (m_debug)
+      m_debug_opt->setChecked(true);
+    m_timer_opt = new QCheckBox("Timer enabled");
+    m_timer_opt->setFocusPolicy(Qt::NoFocus);
+    if (m_timer_enabled)
+      m_timer_opt->setChecked(true);
+    connect(m_debug_opt, SIGNAL(stateChanged(int)), this, SLOT(enableDebug(int)));
+    connect(m_timer_opt, SIGNAL(stateChanged(int)), this, SLOT(enableTimer(int)));
     
     if (blockimage.load(YELLOW)) {
       block2->setPixmap(blockimage);
@@ -158,6 +168,8 @@ namespace mynamespace {
     temp->addWidget(m_move_count);
     temp->addWidget(m_move_count_B);
     m_intro->addLayout(temp);
+    m_intro->addWidget(m_debug_opt);
+    m_intro->addWidget(m_timer_opt);
     m_intro->addWidget(m_remaining);
     m_intro->addWidget(m_restart);
     
@@ -177,8 +189,6 @@ namespace mynamespace {
     m_timer = new QTimer();
     if (m_timer_enabled) {
       connect(m_timer, SIGNAL(timeout()), this, SLOT(timerOut()));
-      m_timer->start(1000);
-      info(0, "Timer started.");
     }
     setWindowTitle(tr("Blocks 1.1 - Santi Pagola 2016"));
     show();
@@ -351,9 +361,11 @@ namespace mynamespace {
       m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
     } else {
       --m_rem_secs;
-      m_remaining->setText(m_secs + QString::number(m_rem_secs));
+      m_remaining->setText(m_secs + "0" + QString::number(m_rem_secs));
       if (m_rem_secs < 5) {
 	m_remaining->setStyleSheet("background-color: white; color: red; font: arial 12px;");
+      } else {
+	m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
       }
     }
   }
@@ -606,6 +618,28 @@ namespace mynamespace {
     //empty locked positions
     m_locked_pos.clear();
     m_locked_pos_B.clear();
-    
+
+    //start timer if timer support is enabled
+    if (m_timer_enabled) {
+      info(0, "timer started");
+      m_timer->start(1000);
+    }
+  }
+
+  void MyGui::enableDebug(int opt) {
+    m_debug = opt;
+    info(0, "Debug is: " + QString::number(m_debug));
+  }
+
+  void MyGui::enableTimer(int opt) {
+    m_timer_enabled = opt;
+    if (opt) {
+      connect(m_timer, SIGNAL(timeout()), this, SLOT(timerOut()));
+    } else {
+      disconnect(m_timer, SIGNAL(timeout()), this, SLOT(timerOut()));
+      m_rem_secs = 10;
+      m_remaining->setText(m_secs + "10");
+    }
+    info(0, "Timer is: " + QString::number(m_timer_enabled));
   }
 } //mynamespace
