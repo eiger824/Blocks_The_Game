@@ -21,7 +21,7 @@ namespace mynamespace {
 				 m_rem_secs(10),
 				 m_wins(0),
 				 m_wins_B(0) {
-    setFixedSize(600,700);
+    setFixedSize(600,750);
     setStyleSheet("background-color: grey;");
 
     m_main_layout = new QVBoxLayout;
@@ -175,21 +175,25 @@ namespace mynamespace {
     m_first->addWidget(block1);
     m_first->addWidget(block3);
     m_first->addWidget(block4);
+    m_first->setSpacing(7);
     
     m_second->addWidget(block5);
     m_second->addWidget(block6);
     m_second->addWidget(block7);
     m_second->addWidget(block8);
+    m_second->setSpacing(7);
 
     m_third->addWidget(block9);
     m_third->addWidget(block10);
     m_third->addWidget(block11);
     m_third->addWidget(block12);
+    m_third->setSpacing(7);
     
     m_fourth->addWidget(block13);
     m_fourth->addWidget(block14);
     m_fourth->addWidget(block15);
     m_fourth->addWidget(block16);
+    m_fourth->setSpacing(7);
 
     QHBoxLayout *temp = new QHBoxLayout;
     QHBoxLayout *names = new QHBoxLayout;
@@ -215,6 +219,7 @@ namespace mynamespace {
     m_main_layout->addLayout(m_second);
     m_main_layout->addLayout(m_third);
     m_main_layout->addLayout(m_fourth);
+    m_main_layout->setSpacing(10);
 
     //set layout
     setLayout(m_main_layout);
@@ -235,7 +240,6 @@ namespace mynamespace {
   }
 
   void MyGui::keyPressEvent(QKeyEvent *event) {
-    std::cout << event->key() << std::endl;
     if (event->key() == LEFT) {
       //move left
       updateCurrentRow(0);
@@ -306,9 +310,21 @@ namespace mynamespace {
 	  !m_locked_pos_B.contains(m_current)) {
 	m_locked_pos << m_current;
 	printLocked();
+	unsigned int nr = m_locked_pos.size()
+	  + m_locked_pos_B.size();
 	info(0, "Nr locked positions: "
-	     + QString::number(m_locked_pos.size()
-			       + m_locked_pos_B.size()));
+	     + QString::number(nr));
+	if (nr == MAX_ROWS * MAX_COLS) {
+	  //stop timer
+	  if (m_timer->isActive())
+	    m_timer->stop();
+	  //reset counter
+	  m_rem_secs = 10;
+	  m_remaining->setText(m_secs + QString::number(m_rem_secs));
+	  m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
+	  //and reset game
+	  resetGame();
+	}
 	return true;
       } else {
 	QMessageBox::information(this, "Wrong move",
@@ -407,11 +423,15 @@ namespace mynamespace {
 	if (!isPosLocked(i-1,j)) { //see if position is free
 	  if (checkPos(i-1,j)) { //position indicated by m_current(_B), THAT color is different
 	    if (target.load(m_current_player)) {
-	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
+	      QLabel *target_block =
+		qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget());
+	      target_block->setPixmap(target);
 	    }
 	  } else {
 	    if (target.load(QString::fromStdString("blue.png"))) {
-	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
+	      QLabel *target_block =
+		qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget());
+	      target_block->setPixmap(target);
 	    }
 	  }  
 	}
