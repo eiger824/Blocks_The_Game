@@ -235,6 +235,7 @@ namespace mynamespace {
   }
 
   void MyGui::keyPressEvent(QKeyEvent *event) {
+    std::cout << event->key() << std::endl;
     if (event->key() == LEFT) {
       //move left
       updateCurrentRow(0);
@@ -255,7 +256,8 @@ namespace mynamespace {
       updateCurrentCol(1);
       info();
       updateLabels();
-    } else if (event->key() == ESC) {
+    } else if (event->key() == ESC ||
+	       event->key() == ENTER) {
       //stop timer
       if (m_timer_enabled) {
 	if (m_timer->isActive()) {
