@@ -33,12 +33,14 @@ namespace mynamespace {
     void machinePlays();
     void switchPlayer();
     bool checkIfWin();
-    void save2list();
+    bool save2list();
     void updateCurrentCol(int opt);
     void updateCurrentRow(int opt);
     bool checkPos(unsigned int x, unsigned int y);
     bool isPosLocked(unsigned int x, unsigned int y);
     void printLocked();
+    bool checkDiag();
+    void resetGame();
   private:
     QVBoxLayout *m_main_layout;
     QHBoxLayout *m_first;
@@ -53,8 +55,6 @@ namespace mynamespace {
     QString m_current_player;
     QList<QPair<unsigned int,unsigned int> > m_locked_pos;
     QList<QPair<unsigned int,unsigned int> > m_locked_pos_B;
-    QString YELLOW = "yellow.png";
-    QString RED = "red.png";
   };
   
 } //mynamespace

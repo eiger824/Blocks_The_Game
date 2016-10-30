@@ -1,5 +1,6 @@
 #include <iostream>
 #include <QFont>
+#include <QMessageBox>
 #include "mygui.hpp"
 #include "keyvalues.hpp"
 
@@ -182,22 +183,50 @@ namespace mynamespace {
       }
     } else if (event->key() == ESC) {
       //save locket pos of current player to list
-      save2list();
-      info(0, "Locking position (" + m_current_player + "): " + currentPair2String());
-      switchPlayer();
+      if (save2list()) {
+	info(0, "Locking position (" + m_current_player + "): " + currentPair2String());
+	//check if win
+	if (checkIfWin()) {
+	  QMessageBox::information(this, m_current_player + " wins!!",
+				   "close this dialog to start playing again.");
+	  resetGame();
+	} else {
+	  //switch player and reset position
+	  switchPlayer();
+	}
+      }
     }
   }
 
-  void MyGui::save2list() {
+  bool MyGui::save2list() {
     if (m_current_player == YELLOW) {
-      m_locked_pos << m_current;
+      if (!m_locked_pos.contains(m_current) &&
+	  !m_locked_pos_B.contains(m_current)) {
+	m_locked_pos << m_current;
+	printLocked();
+	info(0, "Nr locked positions: "
+	     + QString::number(m_locked_pos.size()
+			       + m_locked_pos_B.size()));
+	return true;
+      } else {
+	info(1, "Position exists!!");
+	return false;
+      }
     } else {
-      m_locked_pos_B << m_current_B;
+
+      if (!m_locked_pos.contains(m_current_B) &&
+	  !m_locked_pos_B.contains(m_current_B)) {
+	m_locked_pos_B << m_current_B;
+	printLocked();
+	info(0, "Nr locked positions: "
+	     + QString::number(m_locked_pos.size()
+			       + m_locked_pos_B.size()));
+	return true;
+      } else {
+	info(1, "Position exists!!");
+	return false;
+      }
     }
-    printLocked();
-    info(0, "Nr locked positions: "
-	 + QString::number(m_locked_pos.size()
-			   + m_locked_pos_B.size()));
   }
 
   void MyGui::updateCurrentCol(int opt) {
@@ -248,8 +277,6 @@ namespace mynamespace {
     for (unsigned i=0; i < MAX_ROWS; ++i) {
       for (unsigned j=0; j< MAX_COLS; ++j) {
 	if (!isPosLocked(i,j)) { //see if position is free
-
-	  
 	  if (checkPos(i,j)) { //position indicated by m_current(_B), THAT color is different
 	    if (target.load(m_current_player)) {
 	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
@@ -258,12 +285,8 @@ namespace mynamespace {
 	    if (target.load(QString::fromStdString("blue.png"))) {
 	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
 	    }
-	  }
-
-
-
-	  
-	} //end of if (!isPosLocked(i,j))
+	  }  
+	}
       }
     }
   }
@@ -378,9 +401,105 @@ namespace mynamespace {
       Three "scenarios" must be tested:
       1.) column fill?
       2.) row fill?
-      3.) diagonal fill?
+      3.) diagonal fill? (iif (i==j || i==3-j))
     */
-    return true;
+    unsigned int cnt=0;
+    if (m_current_player == YELLOW) {
+      //first check column fill
+      if (m_locked_pos.contains(qMakePair(m_current.first,(unsigned int)0))) ++cnt;
+      if (m_locked_pos.contains(qMakePair(m_current.first,(unsigned int)1))) ++cnt;
+      if (m_locked_pos.contains(qMakePair(m_current.first,(unsigned int)2))) ++cnt;
+      if (m_locked_pos.contains(qMakePair(m_current.first,(unsigned int)3))) ++cnt;
+      info(0, "Column cnt was: " + QString::number(cnt));
+      if (cnt==4) return true;
+      //reset cnt
+      cnt=0;
+      //check row fill
+      if (m_locked_pos.contains(qMakePair((unsigned int)0, m_current.second))) ++cnt;
+      if (m_locked_pos.contains(qMakePair((unsigned int)1, m_current.second))) ++cnt;
+      if (m_locked_pos.contains(qMakePair((unsigned int)2, m_current.second))) ++cnt;
+      if (m_locked_pos.contains(qMakePair((unsigned int)3, m_current.second))) ++cnt;
+      info(0, "Row cnt was: " + QString::number(cnt));
+      if (cnt==4) return true;
+      //reset cnt
+      cnt=0;
+      //Now check if diagonal fill is possible
+      if (!checkDiag()) {
+	return false;
+      } else {
+	if (m_locked_pos.contains(qMakePair((unsigned int)0, (unsigned int)0))) ++cnt;
+	if (m_locked_pos.contains(qMakePair((unsigned int)1, (unsigned int)1))) ++cnt;
+	if (m_locked_pos.contains(qMakePair((unsigned int)2, (unsigned int)2))) ++cnt;
+	if (m_locked_pos.contains(qMakePair((unsigned int)3, (unsigned int)3))) ++cnt;
+	info(0, "Cnt was: " + QString::number(cnt));
+	if (cnt==4) return true;
+	//reset cnt
+	cnt=0;
+	//or inverted
+	if (m_locked_pos.contains(qMakePair((unsigned int)0, (unsigned int)3))) ++cnt;
+	if (m_locked_pos.contains(qMakePair((unsigned int)1, (unsigned int)2))) ++cnt;
+	if (m_locked_pos.contains(qMakePair((unsigned int)2, (unsigned int)1))) ++cnt;
+	if (m_locked_pos.contains(qMakePair((unsigned int)3, (unsigned int)0))) ++cnt;
+	info(0, "Cnt was: " + QString::number(cnt));
+	if (cnt==4) return true;
+	//reset cnt
+	cnt=0;
+      }
+      return false;
+    } else {
+      //first check column fill
+      if (m_locked_pos_B.contains(qMakePair(m_current_B.first,(unsigned int)0))) ++cnt;
+      if (m_locked_pos_B.contains(qMakePair(m_current_B.first,(unsigned int)1))) ++cnt;
+      if (m_locked_pos_B.contains(qMakePair(m_current_B.first,(unsigned int)2))) ++cnt;
+      if (m_locked_pos_B.contains(qMakePair(m_current_B.first,(unsigned int)3))) ++cnt;
+      if (cnt==4) return true;
+      //reset cnt
+      cnt=0;
+      //check row fill
+      if (m_locked_pos_B.contains(qMakePair((unsigned int)0, m_current_B.second))) ++cnt;
+      if (m_locked_pos_B.contains(qMakePair((unsigned int)1, m_current_B.second))) ++cnt;
+      if (m_locked_pos_B.contains(qMakePair((unsigned int)2, m_current_B.second))) ++cnt;
+      if (m_locked_pos_B.contains(qMakePair((unsigned int)3, m_current_B.second))) ++cnt;
+      if (cnt==4) return true;
+      //reset cnt
+      cnt=0;
+      //Now check if diagonal fill is possible
+      if (!checkDiag()) {
+	return false;
+      } else {
+	if (m_locked_pos_B.contains(qMakePair((unsigned int)0, (unsigned int)0))) ++cnt;
+	if (m_locked_pos_B.contains(qMakePair((unsigned int)1, (unsigned int)1))) ++cnt;
+	if (m_locked_pos_B.contains(qMakePair((unsigned int)2, (unsigned int)2))) ++cnt;
+	if (m_locked_pos_B.contains(qMakePair((unsigned int)3, (unsigned int)3))) ++cnt;
+	info(0, "Cnt was: " + QString::number(cnt));
+	if (cnt==4) return true;
+	//reset cnt
+	cnt=0;
+	//or inverted
+	if (m_locked_pos_B.contains(qMakePair((unsigned int)0, (unsigned int)3))) ++cnt;
+	if (m_locked_pos_B.contains(qMakePair((unsigned int)1, (unsigned int)2))) ++cnt;
+	if (m_locked_pos_B.contains(qMakePair((unsigned int)2, (unsigned int)1))) ++cnt;
+	if (m_locked_pos_B.contains(qMakePair((unsigned int)3, (unsigned int)0))) ++cnt;
+	if (cnt==4) return true;
+	//reset cnt
+	cnt=0;
+      }
+      return false;
+    }
+  }
+
+  bool MyGui::checkDiag() {
+    if (m_current_player == YELLOW) {
+      if (m_current.first == m_current.second ||
+	  m_current.first == 3 - m_current.second)
+	return true;
+      else return false;
+    } else {
+      if (m_current_B.first == m_current_B.second ||
+	  m_current_B.first == 3 - m_current_B.second)
+	return true;
+      else return false;
+    }
   }
 
   void MyGui::printLocked() {
@@ -395,5 +514,26 @@ namespace mynamespace {
 		<< m_locked_pos_B.at(j).second << ")" << std::endl;
     }
     std::cout <<"------------------------\n";
+  }
+
+  void MyGui::resetGame() {
+    QPixmap target;
+    for (unsigned i=0; i < MAX_ROWS; ++i) {
+      for (unsigned j=0; j< MAX_COLS; ++j) {
+	if (target.load(QString::fromStdString("blue.png"))) {
+	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
+	}
+      }
+    }
+    //reset positions for both
+    m_current.first = 0;
+    m_current.second = 0;
+    m_current_B.first = 0;
+    m_current_B.second = 0;
+
+    //empty locked positions
+    m_locked_pos.clear();
+    m_locked_pos_B.clear();
+    
   }
 } //mynamespace
