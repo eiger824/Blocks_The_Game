@@ -237,32 +237,24 @@ namespace mynamespace {
   void MyGui::keyPressEvent(QKeyEvent *event) {
     if (event->key() == LEFT) {
       //move left
-      if (canMove(LEFT)) {
-	updateCurrentRow(0);
-	info();
-	updateLabels();
-      }
+      updateCurrentRow(0);
+      info();
+      updateLabels();
     } else if (event->key() == RIGHT) {
       //move right
-      if (canMove(RIGHT)) {
-        updateCurrentRow(1);
-	info();
-	updateLabels();
-      }
+      updateCurrentRow(1);
+      info();
+      updateLabels();
     } else if (event->key() == UP) {
       //move up
-      if (canMove(UP)) {
-	updateCurrentCol(0);
-	info();
-	updateLabels();
-      }
+      updateCurrentCol(0);
+      info();
+      updateLabels();
     } else if (event->key() == DOWN) {
       //move down
-      if (canMove(DOWN)) {
-	updateCurrentCol(1);
-	info();
-	updateLabels();
-      }
+      updateCurrentCol(1);
+      info();
+      updateLabels();
     } else if (event->key() == ESC) {
       //stop timer
       if (m_timer_enabled) {
@@ -317,7 +309,8 @@ namespace mynamespace {
 			       + m_locked_pos_B.size()));
 	return true;
       } else {
-	QMessageBox::information(this, "Wrong move", "Position is already locked.\nSelect another free position.");
+	QMessageBox::information(this, "Wrong move",
+				 "Position is already locked.\nSelect another free position.");
 	info(1, "Position exists!!");
 	return false;
       }
@@ -340,29 +333,53 @@ namespace mynamespace {
 
   void MyGui::updateCurrentCol(int opt) {
     if (m_current_player == YELLOW) {
-      if (opt == 1)
+      if (opt == 1) {
 	++m_current.first;
-      else
-	--m_current.first;
+	if (m_current.first == MAX_ROWS)
+	  m_current.first = 0;
+      } else {
+	if (m_current.first > 0)
+	  --m_current.first;
+	else
+	  m_current.first = MAX_ROWS-1;
+      }
     } else {
-      if (opt == 1)
+      if (opt == 1) {
 	++m_current_B.first;
-      else
-	--m_current_B.first;
+	if (m_current_B.first == MAX_ROWS)
+	  m_current_B.first = 0;
+      } else {
+	if (m_current_B.first > 0)
+	  --m_current_B.first;
+	else
+	  m_current_B.first = MAX_ROWS-1;
+      }
     }
   }
 
   void MyGui::updateCurrentRow(int opt) {
     if (m_current_player == YELLOW) {
-      if (opt == 1)
+      if (opt == 1) {
 	++m_current.second;
-      else
-	--m_current.second;
+	if (m_current.second == MAX_COLS)
+	  m_current.second = 0;
+      } else {
+	if (m_current.second > 0)
+	  --m_current.second;
+	else
+	  m_current.second = MAX_COLS-1;
+      }
     } else {
-      if (opt == 1)
+      if (opt == 1) {
 	++m_current_B.second;
-      else
-	--m_current_B.second;
+	if (m_current_B.second == MAX_COLS)
+	  m_current_B.second = 0;
+      } else {
+	if (m_current_B.second > 0)
+	  --m_current_B.second;
+	else
+	  m_current_B.second = MAX_COLS-1;
+      }
     }
   }
 
