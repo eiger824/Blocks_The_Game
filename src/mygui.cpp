@@ -282,7 +282,12 @@ namespace mynamespace {
 	info(0, "Locking position (" + m_current_player + "): " + currentPair2String());
 	//check if win
 	if (checkIfWin()) {
-	  QMessageBox::information(this, m_current_player + " wins!!",
+	  QString player;
+	  if (m_current_player == YELLOW)
+	    player = m_player_edit->toPlainText();
+	  else
+	    player = m_player_edit_B->toPlainText();
+	  QMessageBox::information(this, player + " wins!!",
 				   "Close this dialog to start playing again.");
 	  if (m_current_player == YELLOW) {
 	    ++m_wins;
@@ -689,4 +694,5 @@ namespace mynamespace {
     }
     info(0, "Timer is: " + QString::number(m_timer_enabled));
   }
+
 } //mynamespace
