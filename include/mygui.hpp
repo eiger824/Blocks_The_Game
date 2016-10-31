@@ -76,6 +76,7 @@ namespace mynamespace {
     unsigned int m_rem_secs;
     QPushButton *m_restart;
     bool m_machine;
+    bool m_my_turn;
     bool m_timer_enabled;
     QLabel *m_remaining;
     QCheckBox *m_debug_opt;

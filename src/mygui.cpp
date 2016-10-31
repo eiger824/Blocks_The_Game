@@ -13,6 +13,7 @@ namespace mynamespace {
 	       QString player_B,
 	       QWidget* parent): QWidget(parent),
 				 m_started(false),
+				 m_my_turn(true),
 				 m_debug(debug),
 				 m_machine(machine),
 				 m_timer_enabled(timer),
@@ -240,6 +241,7 @@ namespace mynamespace {
   }
 
   void MyGui::keyPressEvent(QKeyEvent *event) {
+    if (m_machine && !m_my_turn) return;
     if (event->key() == LEFT) {
       //move left
       updateCurrentRow(0);
@@ -299,6 +301,11 @@ namespace mynamespace {
 	} else {
 	  //switch player and reset position
 	  switchPlayer();
+	  if (m_machine) {
+	    info(0, "Machine is playing.");
+	    m_my_turn = false;
+	    machinePlays();
+	  }
 	}
       }
     }
@@ -532,9 +539,28 @@ namespace mynamespace {
   }
   
   void MyGui::machinePlays() {
-    
+    //first, check one available position
+    unsigned int x = rand() % 4;
+    unsigned int y = rand() % 4;
+    while (isPosLocked(x,y)) {
+      x = rand() % 4;
+      y = rand() % 4;
+    }
+    //set block there
+    QPixmap target;
+    if (target.load(m_current_player)) {
+      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(x+1)->layout())
+			    ->itemAt(y)->widget())->setPixmap(target);
+    }
+    //save position
+    if (m_current_player == YELLOW) {
+      m_locked_pos.append(qMakePair(x,y));
+    } else {
+      m_locked_pos_B.append(qMakePair(x,y));
+    }
     //and return control to user
     switchPlayer();
+    m_my_turn = true;
   }
 
   void MyGui::switchPlayer() {
