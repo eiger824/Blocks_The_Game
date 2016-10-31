@@ -99,6 +99,11 @@ namespace mynamespace {
     m_player_edit_B->setTabChangesFocus(true);
     if (!player_B.isEmpty())
       m_player_edit_B->setText(player_B);
+    if (m_machine) {
+      m_player_edit_B->setEnabled(false);
+      m_player_edit_B->setStyleSheet("background-color: grey; color: white;");
+      m_player_edit_B->setText("Machine");
+    }
     /***************************************************/
     
     if (blockimage.load(YELLOW)) {
@@ -540,27 +545,48 @@ namespace mynamespace {
   
   void MyGui::machinePlays() {
     //first, check one available position
-    unsigned int x = rand() % 4;
-    unsigned int y = rand() % 4;
-    while (isPosLocked(x,y)) {
+    unsigned int x;
+    unsigned int y;
+    do {
       x = rand() % 4;
       y = rand() % 4;
-    }
+    } while (isPosLocked(x,y));
     //set block there
     QPixmap target;
     if (target.load(m_current_player)) {
       qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(x+1)->layout())
 			    ->itemAt(y)->widget())->setPixmap(target);
     }
+    info(0, "Locking position (" + m_current_player + "): "
+	 + QString::number(x) + ","
+	 + QString::number(y));
     //save position
     if (m_current_player == YELLOW) {
       m_locked_pos.append(qMakePair(x,y));
+      ++m_cnt;
+      m_move_count->setText(m_info + QString::number(m_cnt));
     } else {
       m_locked_pos_B.append(qMakePair(x,y));
+      ++m_cnt_B;
+      m_move_count_B->setText(m_info + QString::number(m_cnt_B));
     }
     //and return control to user
     switchPlayer();
     m_my_turn = true;
+    //if max reached, reset
+    unsigned int nr = m_locked_pos.size()
+      + m_locked_pos_B.size();
+    if (nr == MAX_ROWS * MAX_COLS) {
+      //stop timer
+      if (m_timer->isActive())
+	m_timer->stop();
+      //reset counter
+      m_rem_secs = 10;
+      m_remaining->setText(m_secs + QString::number(m_rem_secs));
+      m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
+      //and reset game
+      resetGame();
+    }
   }
 
   void MyGui::switchPlayer() {
