@@ -27,6 +27,7 @@ int help(int code) {
 }
 
 int main(int argc, char* argv[]) {
+  std::system("clear");
   QApplication app(argc, argc + argv);
   MyGui *gui;
   if (argc==1) {
