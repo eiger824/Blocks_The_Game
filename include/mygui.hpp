@@ -52,6 +52,7 @@ namespace mynamespace {
     void printLocked();
     bool checkDiag();
     void switchPlayer();
+    bool isPossibleWin(bool &col, unsigned int &nr);
   private:
     QVBoxLayout *m_main_layout;
     QVBoxLayout *m_intro;

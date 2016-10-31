@@ -547,10 +547,17 @@ namespace mynamespace {
   }
   
   void MyGui::machinePlays() {
+    /*
+     Two things must be taken into consideration:
+       1.) Ruin your oponent! 
+       2.) Make your move
+    */
     //first, check one available position
-    unsigned int x;
-    unsigned int y;
+    unsigned int x = 0;
+    unsigned int y = 0;
     bool found;
+    bool col;
+    unsigned int n;
     if (m_level == EASY) {
       do {
 	x = rand() % 4;
@@ -558,39 +565,68 @@ namespace mynamespace {
       } while (isPosLocked(x,y));
     } else {
       found = false;
-      //First try edges
-      for (unsigned i=0; i<= MAX_ROWS; i+= 3) {
-	for (unsigned j=0; j<=MAX_COLS; j+=3) {
-	  if (!isPosLocked(i,j)) {
-	    x = i;
-	    y = j;
-	    found = true;
-	    break;
+      //1.) Ruin your oponent
+      //See if player1 is about/on the way to make a win-move
+      if (isPossibleWin(col,n)) {
+	info(0, "*** POSSIBLE WIN ON ***\n -> Col(1)/Row(0): " + QString::number(col));
+	info(0, " -> Nr.: " + QString::number(n) + "\n***********************");
+	if (col) {
+	  //machine will cut the column 'n'
+	  for (unsigned i=0; i < MAX_ROWS; ++i) {
+	    if (!isPosLocked(i,n)) {
+	      x = i;
+	      y = n;
+	      found = true;
+	      break;
+	    }
+	  }
+	} else {
+	  //machine will cut the row 'n'
+	  for (unsigned i=0; i < MAX_COLS; ++i) {
+	    if (!isPosLocked(n,i)) {
+	      x = n;
+	      y = i;
+	      found = true;
+	      break;
+	    }
 	  }
 	}
-      }
-      //Retrieve last pair from oponent
-      QPair<unsigned int, unsigned int>pair = m_locked_pos.last();
-      if ( !found) {
-	//check if there are some free places in current column/row
-	//first check row
-	for (unsigned i=0; i<MAX_ROWS; ++i) {
-	  if (!isPosLocked(pair.first,i)) {
-	    x = pair.first;
-	    y = i;
-	    found = true;
-	    break;
+      } else {
+	//2.) Make your move
+	//First try edges
+	for (unsigned i=0; i<= MAX_ROWS; i+= 3) {
+	  for (unsigned j=0; j<=MAX_COLS; j+=3) {
+	    if (!isPosLocked(i,j)) {
+	      x = i;
+	      y = j;
+	      found = true;
+	      break;
+	    }
 	  }
 	}
-      }
-      if (!found) {
-	//then check col
-	for (unsigned i=0; i<MAX_COLS; ++i) {
-	  if (!isPosLocked(i, pair.second)) {
-	    x = i;
-	    y = pair.second;
-	    found = true;
-	    break;
+	//Retrieve last pair from oponent
+	QPair<unsigned int, unsigned int>pair = m_locked_pos.last();
+	if ( !found) {
+	  //check if there are some free places in current column/row
+	  //first check row
+	  for (unsigned i=0; i<MAX_ROWS; ++i) {
+	    if (!isPosLocked(pair.first,i)) {
+	      x = pair.first;
+	      y = i;
+	      found = true;
+	      break;
+	    }
+	  }
+	}
+	if (!found) {
+	  //then check col
+	  for (unsigned i=0; i<MAX_COLS; ++i) {
+	    if (!isPosLocked(i, pair.second)) {
+	      x = i;
+	      y = pair.second;
+	      found = true;
+	      break;
+	    }
 	  }
 	}
       }
@@ -598,6 +634,11 @@ namespace mynamespace {
     info(0, "[machine]Going to try position: ["
 	 + QString::number(x) + ","
 	 + QString::number(y) + "]");
+    //Extra check
+    if (isPosLocked(x,y)) {
+      info(1, "Position was already locked.\nReturning.\n");
+      return;
+    }
     //set block there
     QPixmap target;
     if (target.load(m_current_player)) {
@@ -809,7 +850,7 @@ namespace mynamespace {
   void MyGui::resetGame() {
     info(0, "Resetting game.");
     QPixmap target;
-    for (unsigned i=2; i <= MAX_ROWS; ++i) {
+    for (unsigned i=i; i <= MAX_ROWS; ++i) {
       for (unsigned j=0; j< MAX_COLS; ++j) {
 	if (target.load(QString::fromStdString("blue.png"))) {
 	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
@@ -847,6 +888,46 @@ namespace mynamespace {
     m_cnt_B = 0;
     m_move_count->setText(m_info + QString::number(m_cnt));
     m_move_count_B->setText(m_info + QString::number(m_cnt_B));
+  }
+
+  bool MyGui::isPossibleWin(bool &col, unsigned int &nr) {
+    //function that will check if player YELLOW is on the way to win
+    //check columns
+    unsigned cnt=0;
+    for (unsigned i=0; i<MAX_ROWS; ++i) {
+      for (unsigned j=0; j<MAX_COLS; ++j) {
+	if (m_locked_pos.contains(qMakePair(j,i))) {
+	  ++cnt;
+	}
+	if (m_locked_pos_B.contains(qMakePair(j,i))) {
+	  --cnt;
+	}
+      }
+      if (cnt > 1) {
+	col = true;
+	nr = i;
+	return true;
+      }
+      cnt = 0;
+    }
+    //check rows
+     for (unsigned j=0; j<MAX_COLS; ++j) {
+      for (unsigned i=0; i<MAX_ROWS; ++i) {
+	if (m_locked_pos.contains(qMakePair(j,i))) {
+	  ++cnt;
+	}
+	if (m_locked_pos_B.contains(qMakePair(j,i))) {
+	  --cnt;
+	}
+      }
+      if (cnt > 1) {
+	col = false;
+	nr = j;
+	return true;
+      }
+      cnt = 0;
+    }
+    return false;
   }
 
   void MyGui::enableDebug(int opt) {
