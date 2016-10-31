@@ -8,3 +8,5 @@ static const int ENTER = 16777220;
 //globals
 QString YELLOW = "yellow.png";
 QString RED = "red.png";
+QString EASY = "easy";
+QString HARD = "hard";

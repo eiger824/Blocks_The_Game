@@ -17,12 +17,13 @@ namespace mynamespace {
 
   const int MAX_ROWS = 4;
   const int MAX_COLS = 4;
-  
+    
   class MyGui : public QWidget {
     Q_OBJECT
   public:
     explicit MyGui(bool debug = false,
 		   bool machine = false,
+		   QString level = "",
 		   bool timer_enabled = false,
 		   QString player = "",
 		   QString player_B = "",
@@ -88,6 +89,7 @@ namespace mynamespace {
     QLabel *m_player_B;
     QTextEdit *m_player_edit;
     QTextEdit *m_player_edit_B;
+    QString m_level;
   };
   
 } //mynamespace

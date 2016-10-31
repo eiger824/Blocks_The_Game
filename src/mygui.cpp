@@ -8,6 +8,7 @@ namespace mynamespace {
 
   MyGui::MyGui(bool debug,
 	       bool machine,
+	       QString level,
 	       bool timer,
 	       QString player,
 	       QString player_B,
@@ -16,6 +17,7 @@ namespace mynamespace {
 				 m_my_turn(true),
 				 m_debug(debug),
 				 m_machine(machine),
+				 m_level(level),
 				 m_timer_enabled(timer),
 				 m_cnt(0),
 				 m_cnt_B(0),
@@ -102,7 +104,8 @@ namespace mynamespace {
     if (m_machine) {
       m_player_edit_B->setEnabled(false);
       m_player_edit_B->setStyleSheet("background-color: grey; color: white;");
-      m_player_edit_B->setText("Machine");
+      m_player_edit_B->setText("Machine. Level: " + m_level);
+      info(0, "Selected level: " + m_level);
     }
     /***************************************************/
     
@@ -547,10 +550,54 @@ namespace mynamespace {
     //first, check one available position
     unsigned int x;
     unsigned int y;
-    do {
-      x = rand() % 4;
-      y = rand() % 4;
-    } while (isPosLocked(x,y));
+    bool found;
+    if (m_level == EASY) {
+      do {
+	x = rand() % 4;
+	y = rand() % 4;
+      } while (isPosLocked(x,y));
+    } else {
+      found = false;
+      //First try edges
+      for (unsigned i=0; i<= MAX_ROWS; i+= 3) {
+	for (unsigned j=0; j<=MAX_COLS; j+=3) {
+	  if (!isPosLocked(i,j)) {
+	    x = i;
+	    y = j;
+	    found = true;
+	    break;
+	  }
+	}
+      }
+      //Retrieve last pair from oponent
+      QPair<unsigned int, unsigned int>pair = m_locked_pos.last();
+      if ( !found) {
+	//check if there are some free places in current column/row
+	//first check row
+	for (unsigned i=0; i<MAX_ROWS; ++i) {
+	  if (!isPosLocked(pair.first,i)) {
+	    x = pair.first;
+	    y = i;
+	    found = true;
+	    break;
+	  }
+	}
+      }
+      if (!found) {
+	//then check col
+	for (unsigned i=0; i<MAX_COLS; ++i) {
+	  if (!isPosLocked(i, pair.second)) {
+	    x = i;
+	    y = pair.second;
+	    found = true;
+	    break;
+	  }
+	}
+      }
+    }
+    info(0, "[machine]Going to try position: ["
+	 + QString::number(x) + ","
+	 + QString::number(y) + "]");
     //set block there
     QPixmap target;
     if (target.load(m_current_player)) {
@@ -570,22 +617,44 @@ namespace mynamespace {
       ++m_cnt_B;
       m_move_count_B->setText(m_info + QString::number(m_cnt_B));
     }
-    //and return control to user
-    switchPlayer();
-    m_my_turn = true;
-    //if max reached, reset
-    unsigned int nr = m_locked_pos.size()
-      + m_locked_pos_B.size();
-    if (nr == MAX_ROWS * MAX_COLS) {
-      //stop timer
+
+    if (checkIfWin()) {
+      QString player;
+      if (m_current_player == YELLOW)
+	player = m_player_edit->toPlainText();
+      else
+	player = m_player_edit_B->toPlainText();
+      QMessageBox::information(this, player + " wins!!",
+			       "Close this dialog to start playing again.");
+      if (m_current_player == YELLOW) {
+	++m_wins;
+      } else {
+	++m_wins_B;
+      }
+      //update scores label
+      m_scores->setText("Scores\n" + QString::number(m_wins) +
+			"-" + QString::number(m_wins_B));
       if (m_timer->isActive())
 	m_timer->stop();
-      //reset counter
       m_rem_secs = 10;
       m_remaining->setText(m_secs + QString::number(m_rem_secs));
       m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
-      //and reset game
       resetGame();
+      
+    } else {
+      //and return control to user
+      switchPlayer();
+      m_my_turn = true;
+      //if max reached, reset
+      unsigned int nr = m_locked_pos.size()
+	+ m_locked_pos_B.size();
+      if (nr == MAX_ROWS * MAX_COLS) {
+	//stop timer
+	if (m_timer->isActive())
+	  m_timer->stop();
+	//and reset game
+	resetGame();
+      }
     }
   }
 
@@ -611,8 +680,6 @@ namespace mynamespace {
   bool MyGui::isPosLocked(unsigned int x, unsigned int y) {
     if (m_locked_pos.contains(qMakePair(x,y)) ||
 	m_locked_pos_B.contains(qMakePair(x,y))) {
-      info(0, "Returning true, position found: (" +
-	   QString::number(x) + "," + QString::number(y) + ")");
       return true;
     }
     else return false;
@@ -767,6 +834,19 @@ namespace mynamespace {
     //remove focus to edits
     m_player_edit->setEnabled(false);
     m_player_edit_B->setEnabled(false);
+    //my turn again
+    m_my_turn = true;
+    //reset counter
+    m_rem_secs = 10;
+    m_remaining->setText(m_secs + QString::number(m_rem_secs));
+    m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
+    //change user to YELLOW
+    m_current_player = YELLOW;
+    //reset move count
+    m_cnt = 0;
+    m_cnt_B = 0;
+    m_move_count->setText(m_info + QString::number(m_cnt));
+    m_move_count_B->setText(m_info + QString::number(m_cnt_B));
   }
 
   void MyGui::enableDebug(int opt) {
