@@ -24,7 +24,7 @@ namespace mynamespace {
 				 m_rem_secs(10),
 				 m_wins(0),
 				 m_wins_B(0) {
-    setFixedSize(600,750);
+    setFixedSize(650,750);
     setStyleSheet("background-color: grey;");
 
     m_main_layout = new QVBoxLayout;
@@ -322,10 +322,16 @@ namespace mynamespace {
   }
 
   bool MyGui::save2list() {
+    QPixmap target;
     if (m_current_player == YELLOW) {
       if (!m_locked_pos.contains(m_current) &&
 	  !m_locked_pos_B.contains(m_current)) {
 	m_locked_pos << m_current;
+	//substitute "selected" view with normal view
+	if (target.load("yellow.png")) {
+	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(m_current.first+1)->layout())
+				->itemAt(m_current.second)->widget())->setPixmap(target);
+	}
 	printLocked();
 	unsigned int nr = m_locked_pos.size()
 	  + m_locked_pos_B.size();
@@ -346,20 +352,37 @@ namespace mynamespace {
       } else {
 	QMessageBox::information(this, "Wrong move",
 				 "Position is already locked.\nSelect another free position.");
-	info(1, "Position exists!!");
+	info(1, "Position locked.");
 	return false;
       }
     } else {
-
       if (!m_locked_pos.contains(m_current_B) &&
 	  !m_locked_pos_B.contains(m_current_B)) {
 	m_locked_pos_B << m_current_B;
+	if (target.load("red.png")) {
+	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(m_current_B.first+1)->layout())
+				->itemAt(m_current_B.second)->widget())->setPixmap(target);
+	}
 	printLocked();
+	unsigned int nr = m_locked_pos.size()
+	  + m_locked_pos_B.size();
 	info(0, "Nr locked positions: "
-	     + QString::number(m_locked_pos.size()
-			       + m_locked_pos_B.size()));
+	     + QString::number(nr));
+	if (nr == MAX_ROWS * MAX_COLS) {
+	  //stop timer
+	  if (m_timer->isActive())
+	    m_timer->stop();
+	  //reset counter
+	  m_rem_secs = 10;
+	  m_remaining->setText(m_secs + QString::number(m_rem_secs));
+	  m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
+	  //and reset game
+	  resetGame();
+	}
 	return true;
       } else {
+	QMessageBox::information(this, "Wrong move",
+				 "Position is already locked.\nSelect another free position.");
 	info(1, "Position locked.");
 	return false;
       }
@@ -435,22 +458,62 @@ namespace mynamespace {
   void MyGui::updateLabels() {
     //switch labels
     QPixmap target;
-    for (unsigned i=1; i <= MAX_ROWS; ++i) {
+    /*for (unsigned i=1; i <= MAX_ROWS; ++i) {
       for (unsigned j=0; j< MAX_COLS; ++j) {
-	if (!isPosLocked(i-1,j)) { //see if position is free
-	  if (checkPos(i-1,j)) { //position indicated by m_current(_B), THAT color is different
-	    if (target.load(m_current_player)) {
-	      QLabel *target_block =
-		qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget());
-	      target_block->setPixmap(target);
-	    }
-	  } else {
-	    if (target.load(QString::fromStdString("blue.png"))) {
-	      QLabel *target_block =
-		qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget());
-	      target_block->setPixmap(target);
-	    }
+	//if (!isPosLocked(i-1,j)) { //see if position is free
+	/*if (checkPos(i-1,j)) { //position indicated by m_current(_B), THAT color is different
+	  if (target.load(m_current_player)) {
+	    QLabel *target_block =
+	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget());
+	    target_block->setPixmap(target);
+	  }
+	} else {
+	  if (target.load(QString::fromStdString("blue.png"))) {
+	    QLabel *target_block =
+	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget());
+	    target_block->setPixmap(target);
+	  }
 	  }  
+	//}
+
+	
+      }
+    }*/
+    // fill all blue
+    for (unsigned i=0; i < MAX_ROWS; ++i) {
+      for (unsigned j=0; j < MAX_COLS; ++j) {
+	if (target.load(QString::fromStdString("blue.png"))) {
+	  QLabel *target_block =
+	    qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i+1)->layout())->itemAt(j)->widget());
+	  target_block->setPixmap(target);
+	}
+      }
+    }
+    // fill yellow positions
+    for (unsigned i=0; i < m_locked_pos.size(); ++i) {
+      if (target.load("yellow.png")) {
+	QLabel *target_block =
+	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(m_locked_pos.at(i).first+1)->layout())->itemAt(m_locked_pos.at(i).second)->widget());
+	target_block->setPixmap(target);
+      }
+    }
+    //fill red positions
+    for (unsigned i=0; i < m_locked_pos_B.size(); ++i) {
+      if (target.load("red.png")) {
+	QLabel *target_block =
+	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(m_locked_pos_B.at(i).first+1)->layout())->itemAt(m_locked_pos_B.at(i).second)->widget());
+	target_block->setPixmap(target);
+      }
+    }
+    //and fill the current one
+    for (unsigned i=0; i < MAX_ROWS; ++i) {
+      for (unsigned j=0; j < MAX_COLS; ++j) {
+	if (checkPos(i,j)) { //position indicated by m_current(_B), THAT color is different
+	  if (target.load(m_current_player)) {
+	    QLabel *target_block =
+	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i+1)->layout())->itemAt(j)->widget());
+	    target_block->setPixmap(target);
+	  }
 	}
       }
     }

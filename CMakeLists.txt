@@ -46,7 +46,9 @@ install(FILES
 	src/rosa.png
 	src/orange.png
 	src/red.png
+	src/red_selected.png
 	src/yellow.png
+	src/yellow_selected.png
 	DESTINATION ${PROJECT_BINARY_DIR}
 )
 

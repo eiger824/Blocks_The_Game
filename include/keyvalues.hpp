@@ -6,7 +6,7 @@ static const int ESC = 16777216;
 static const int ENTER = 16777220;
 
 //globals
-QString YELLOW = "yellow.png";
-QString RED = "red.png";
+QString YELLOW = "yellow_selected.png";
+QString RED = "red_selected.png";
 QString EASY = "easy";
 QString HARD = "hard";
