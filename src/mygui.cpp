@@ -113,69 +113,27 @@ namespace mynamespace {
     
     if (blockimage.load(YELLOW)) {
       block2->setPixmap(blockimage);
-      info(0, "Loaded block");
+      info(0, "Loaded initial block");
     }
     if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block1->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block3->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block4->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block5->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block6->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block7->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block8->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block9->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block10->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block11->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block12->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block13->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block14->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block15->setPixmap(blockimage);
-      info(0, "Loaded block");
-    }
-    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block16->setPixmap(blockimage);
-      info(0, "Loaded block");
+      info(0, "Loaded ordinary blocks");
     }
-   
+    
     //init current position
     m_current.first = 0;
     m_current.second = 0;
@@ -251,8 +209,26 @@ namespace mynamespace {
     show();
   }
   MyGui::~MyGui() {
+    delete m_block;
     delete m_timer;
+    delete m_animation_timer;
     delete m_main_layout;
+    delete m_intro;
+    delete m_first;
+    delete m_second;
+    delete m_third;
+    delete m_fourth;
+    delete m_move_count;
+    delete m_move_count_B;
+    delete m_restart;
+    delete m_remaining;
+    delete m_debug_opt;
+    delete m_timer_opt;
+    delete m_scores;
+    delete m_player;
+    delete m_player_B;
+    delete m_player_edit;
+    delete m_player_edit_B;
   }
 
   void MyGui::keyPressEvent(QKeyEvent *event) {
