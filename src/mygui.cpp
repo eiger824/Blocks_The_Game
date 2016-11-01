@@ -924,16 +924,18 @@ namespace mynamespace {
     //function that will check if players YELLOW or machine are on the way to win
     //check columns
     unsigned cnt=0;
-    if (!me) {
+    if (!me) { //possible win for YELLOW player
       for (unsigned i=0; i<MAX_ROWS; ++i) {
 	for (unsigned j=0; j<MAX_COLS; ++j) {
 	  if (m_locked_pos.contains(qMakePair(j,i))) {
 	    ++cnt;
+	  } else if (m_locked_pos_B.contains(qMakePair(j,i))) {
+	    std::cout << "[warning]Line already taken by machine, skipping line...\n";
+	    cnt = 0;
+	    break;
 	  }
-	  if (m_locked_pos_B.contains(qMakePair(j,i))) {
-	    --cnt;
-	  }
-	}
+	} //--> end of column 
+	//when column i is completed, compute counter
 	if (cnt > 1) {
 	  col = true;
 	  nr = i;
@@ -946,11 +948,13 @@ namespace mynamespace {
 	for (unsigned i=0; i<MAX_ROWS; ++i) {
 	  if (m_locked_pos.contains(qMakePair(j,i))) {
 	    ++cnt;
-	  }
-	  if (m_locked_pos_B.contains(qMakePair(j,i))) {
-	    --cnt;
+	  } else if (m_locked_pos_B.contains(qMakePair(j,i))) {
+	    std::cout << "[warning]Row already taken by machine, skipping...\n";
+	    cnt = 0;
+	    break;
 	  }
 	}
+	//when row j is completed, compute counter
 	if (cnt > 1) {
 	  col = false;
 	  nr = j;
@@ -958,7 +962,7 @@ namespace mynamespace {
 	}
 	cnt = 0;
       }
-    } else {
+    } else { //possible win for machine
       //check columns
       for (unsigned i=0; i < MAX_ROWS; ++i) {
 	for (unsigned j=0; j<MAX_COLS; ++j) {
