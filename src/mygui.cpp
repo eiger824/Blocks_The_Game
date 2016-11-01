@@ -1008,8 +1008,9 @@ namespace mynamespace {
 	  if (m_locked_pos.contains(qMakePair(j,i))) {
 	    ++cnt;
 	  } else if (m_locked_pos_B.contains(qMakePair(j,i))) {
-	    std::cout << "[warning]Column "
-		      << i << " already taken by machine, skipping line...\n";
+	    info(0, "[warning]Column "
+		 + QString::number(i)
+		 + " already taken by machine, skipping line...";
 	    cnt = 0;
 	    break;
 	  }
@@ -1028,8 +1029,9 @@ namespace mynamespace {
 	  if (m_locked_pos.contains(qMakePair(j,i))) {
 	    ++cnt;
 	  } else if (m_locked_pos_B.contains(qMakePair(j,i))) {
-	    std::cout << "[warning]Row "
-		      << j << " already taken by machine, skipping...\n";
+	    info(0, "[warning]Row "
+		 + QString::number(j)
+		 + " already taken by machine, skipping...\n";
 	    cnt = 0;
 	    break;
 	  }
