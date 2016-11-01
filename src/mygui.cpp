@@ -567,7 +567,7 @@ namespace mynamespace {
       found = false;
       //1.) Ruin your oponent
       //See if player1 is about/on the way to make a win-move
-      if (isPossibleWin(col,n)) {
+      if (isPossibleWin(col,n)) { //possible win for yellow
 	info(0, "*** POSSIBLE WIN ON ***[YELLOW]\n -> Col(1)/Row(0): " + QString::number(col));
 	info(0, " -> Nr.: " + QString::number(n) + "\n***********************");
 	if (col) {
@@ -593,7 +593,7 @@ namespace mynamespace {
 	}
       } else {
 	//2.) Make your move
-	if (isPossibleWin(col,n,true)) {
+	if (isPossibleWin(col,n,true)) { //possible win for machine
 	  info(0, "*** POSSIBLE WIN ON ***[machine]\n -> Col(1)/Row(0): " + QString::number(col));
 	  info(0, " -> Nr.: " + QString::number(n) + "\n***********************");
 	  if (col) {
@@ -651,6 +651,26 @@ namespace mynamespace {
 		break;
 	      }
 	    }
+	  }
+	  //if none of the above possible, just find any of the available
+	  if ((m_locked_pos.size() +
+	       m_locked_pos_B.size()) < (MAX_ROWS * MAX_COLS)) {
+	    for (unsigned i=0; i<MAX_COLS; ++i) {
+	      for (unsigned j=0; j<MAX_ROWS; ++j) {
+		if (!isPosLocked(i,j)) {
+		  x = i ;
+		  y = j;
+		  found = true;
+		  break;
+		}
+	      }
+	    }
+	  } else {
+	    //stop timer
+	    if (m_timer->isActive())
+	      m_timer->stop();
+	    //and reset game
+	    resetGame();
 	  }
 	}
       }
@@ -930,7 +950,8 @@ namespace mynamespace {
 	  if (m_locked_pos.contains(qMakePair(j,i))) {
 	    ++cnt;
 	  } else if (m_locked_pos_B.contains(qMakePair(j,i))) {
-	    std::cout << "[warning]Line already taken by machine, skipping line...\n";
+	    std::cout << "[warning]Column "
+		      << i << " already taken by machine, skipping line...\n";
 	    cnt = 0;
 	    break;
 	  }
@@ -949,7 +970,8 @@ namespace mynamespace {
 	  if (m_locked_pos.contains(qMakePair(j,i))) {
 	    ++cnt;
 	  } else if (m_locked_pos_B.contains(qMakePair(j,i))) {
-	    std::cout << "[warning]Row already taken by machine, skipping...\n";
+	    std::cout << "[warning]Row "
+		      << j << " already taken by machine, skipping...\n";
 	    cnt = 0;
 	    break;
 	  }
@@ -962,9 +984,10 @@ namespace mynamespace {
 	}
 	cnt = 0;
       }
+      info(0, "Yellow player is no threat now. Retuning false");
     } else { //possible win for machine
       //check columns
-      for (unsigned i=0; i < MAX_ROWS; ++i) {
+      for (unsigned i=0; i<MAX_ROWS; ++i) {
 	for (unsigned j=0; j<MAX_COLS; ++j) {
 	  if (m_locked_pos_B.contains(qMakePair(j,i))) {
 	    ++cnt;
@@ -982,7 +1005,7 @@ namespace mynamespace {
 	cnt = 0;
       }
       //check rows
-      for (unsigned j=0; j < MAX_COLS; ++j) {
+      for (unsigned j=0; j<MAX_COLS; ++j) {
 	for (unsigned i=0; i<MAX_ROWS; ++i) {
 	  if (m_locked_pos_B.contains(qMakePair(j,i))) {
 	    ++cnt;
