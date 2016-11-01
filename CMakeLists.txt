@@ -14,6 +14,7 @@ ADD_DEFINITIONS(
 include_directories(
   src
   include
+  images
   )
 
 set(HEADERS
@@ -38,17 +39,17 @@ target_link_libraries(blocks
   Qt4::QtXml
   )
 install(FILES
-	src/block.png
-	src/block2.png
-	src/blue.png
-	src/green.png
-	src/black.png
-	src/rosa.png
-	src/orange.png
-	src/red.png
-	src/red_selected.png
-	src/yellow.png
-	src/yellow_selected.png
-	DESTINATION ${PROJECT_BINARY_DIR}
+	images/block.png
+	images/block2.png
+	images/blue.png
+	images/green.png
+	images/black.png
+	images/rosa.png
+	images/orange.png
+	images/red.png
+	images/red_selected.png
+	images/yellow.png
+	images/yellow_selected.png
+	DESTINATION ${PROJECT_BINARY_DIR}/images
 )
 

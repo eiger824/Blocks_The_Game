@@ -115,62 +115,63 @@ namespace mynamespace {
       block2->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block1->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block3->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block4->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block5->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block6->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block7->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block8->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block9->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block10->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block11->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block12->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block13->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block14->setPixmap(blockimage);
       info(0, "Loaded block");
-    } if (blockimage.load(QString::fromStdString("blue.png"))) {
+    }
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block15->setPixmap(blockimage);
       info(0, "Loaded block");
     }
-    if (blockimage.load(QString::fromStdString("blue.png"))) {
+    if (blockimage.load(PREFIX+QString::fromStdString("blue.png"))) {
       block16->setPixmap(blockimage);
       info(0, "Loaded block");
     }
@@ -332,7 +333,7 @@ namespace mynamespace {
 	  !m_locked_pos_B.contains(m_current)) {
 	m_locked_pos << m_current;
 	//substitute "selected" view with normal view
-	if (target.load("yellow.png")) {
+	if (target.load(PREFIX+"yellow.png")) {
 	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(m_current.first+1)->layout())
 				->itemAt(m_current.second)->widget())->setPixmap(target);
 	}
@@ -363,7 +364,7 @@ namespace mynamespace {
       if (!m_locked_pos.contains(m_current_B) &&
 	  !m_locked_pos_B.contains(m_current_B)) {
 	m_locked_pos_B << m_current_B;
-	if (target.load("red.png")) {
+	if (target.load(PREFIX+"red.png")) {
 	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(m_current_B.first+1)->layout())
 				->itemAt(m_current_B.second)->widget())->setPixmap(target);
 	}
@@ -462,31 +463,10 @@ namespace mynamespace {
   void MyGui::updateLabels() {
     //switch labels
     QPixmap target;
-    /*for (unsigned i=1; i <= MAX_ROWS; ++i) {
-      for (unsigned j=0; j< MAX_COLS; ++j) {
-	//if (!isPosLocked(i-1,j)) { //see if position is free
-	/*if (checkPos(i-1,j)) { //position indicated by m_current(_B), THAT color is different
-	  if (target.load(m_current_player)) {
-	    QLabel *target_block =
-	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget());
-	    target_block->setPixmap(target);
-	  }
-	} else {
-	  if (target.load(QString::fromStdString("blue.png"))) {
-	    QLabel *target_block =
-	      qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget());
-	    target_block->setPixmap(target);
-	  }
-	  }  
-	//}
-
-	
-      }
-    }*/
     // fill all blue
     for (unsigned i=0; i < MAX_ROWS; ++i) {
       for (unsigned j=0; j < MAX_COLS; ++j) {
-	if (target.load(QString::fromStdString("blue.png"))) {
+	if (target.load(PREFIX+QString::fromStdString("blue.png"))) {
 	  QLabel *target_block =
 	    qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i+1)->layout())->itemAt(j)->widget());
 	  target_block->setPixmap(target);
@@ -495,7 +475,7 @@ namespace mynamespace {
     }
     // fill yellow positions
     for (unsigned i=0; i < m_locked_pos.size(); ++i) {
-      if (target.load("yellow.png")) {
+      if (target.load(PREFIX+"yellow.png")) {
 	QLabel *target_block =
 	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(m_locked_pos.at(i).first+1)->layout())->itemAt(m_locked_pos.at(i).second)->widget());
 	target_block->setPixmap(target);
@@ -503,7 +483,7 @@ namespace mynamespace {
     }
     //fill red positions
     for (unsigned i=0; i < m_locked_pos_B.size(); ++i) {
-      if (target.load("red.png")) {
+      if (target.load(PREFIX+"red.png")) {
 	QLabel *target_block =
 	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(m_locked_pos_B.at(i).first+1)->layout())->itemAt(m_locked_pos_B.at(i).second)->widget());
 	target_block->setPixmap(target);
@@ -970,7 +950,7 @@ namespace mynamespace {
     QPixmap target;
     for (unsigned i=i; i <= MAX_ROWS; ++i) {
       for (unsigned j=0; j< MAX_COLS; ++j) {
-	if (target.load(QString::fromStdString("blue.png"))) {
+	if (target.load(PREFIX+QString::fromStdString("blue.png"))) {
 	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
 	}
       }
@@ -1159,7 +1139,7 @@ namespace mynamespace {
     QPixmap target;
     for (unsigned i=1; i<=MAX_ROWS; ++i) {
       for (unsigned j=0; j<MAX_COLS; ++j) {
-	if (target.load(COLORS.at(rand() % COLORS.size()))) {
+	if (target.load(PREFIX+COLORS.at(rand() % COLORS.size()))) {
 	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
 	}
       }
