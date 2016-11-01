@@ -10,3 +10,6 @@ QString YELLOW = "yellow_selected.png";
 QString RED = "red_selected.png";
 QString EASY = "easy";
 QString HARD = "hard";
+
+//list with colors
+QStringList COLORS = (QStringList() << "black.png" << "green.png" << "orange.png" << "red.png" << "blue.png" << "yellow.png" << "rosa.png");

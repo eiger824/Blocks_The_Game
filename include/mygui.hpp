@@ -37,6 +37,7 @@ namespace mynamespace {
     void enableDebug(int opt);
     void enableTimer(int opt);
     void limitChar();
+    void animationTimerOut();
   private:
     void info(const int code, const QString& msg);
     void info();
@@ -93,6 +94,7 @@ namespace mynamespace {
     QTextEdit *m_player_edit;
     QTextEdit *m_player_edit_B;
     QString m_level;
+    QTimer *m_animation_timer;
   };
   
 } //mynamespace

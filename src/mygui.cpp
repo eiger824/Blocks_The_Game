@@ -242,6 +242,10 @@ namespace mynamespace {
     if (m_timer_enabled) {
       connect(m_timer, SIGNAL(timeout()), this, SLOT(timerOut()));
     }
+    //animation timer
+    m_animation_timer = new QTimer();
+    connect(m_animation_timer, SIGNAL(timeout()), this, SLOT(animationTimerOut()));
+    m_animation_timer->start(1000 / 3);
     setWindowTitle(tr("Blocks 1.1 - Santi Pagola 2016"));
     show();
   }
@@ -982,6 +986,12 @@ namespace mynamespace {
     m_locked_pos.clear();
     m_locked_pos_B.clear();
 
+    //stop animation timer
+    if (m_animation_timer->isActive()) {
+      m_animation_timer->stop();
+      disconnect(m_animation_timer, SIGNAL(timeout()), this, SLOT(animationTimerOut()));
+    }
+    
     //start timer if timer support is enabled
     if (m_timer_enabled) {
       info(0, "timer started");
@@ -1003,6 +1013,9 @@ namespace mynamespace {
     m_cnt_B = 0;
     m_move_count->setText(m_info + QString::number(m_cnt));
     m_move_count_B->setText(m_info + QString::number(m_cnt_B));
+
+    //and update labels
+    updateLabels();
   }
 
   bool MyGui::isPossibleWin(bool &col, unsigned int &nr, bool me) {
@@ -1142,5 +1155,14 @@ namespace mynamespace {
       }
     }
   }
-
+  void MyGui::animationTimerOut() {
+    QPixmap target;
+    for (unsigned i=1; i<=MAX_ROWS; ++i) {
+      for (unsigned j=0; j<MAX_COLS; ++j) {
+	if (target.load(COLORS.at(rand() % COLORS.size()))) {
+	  qobject_cast<QLabel*>(qobject_cast<QLayout*>(m_main_layout->itemAt(i)->layout())->itemAt(j)->widget())->setPixmap(target);
+	}
+      }
+    }
+  }
 } //mynamespace
