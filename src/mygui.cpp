@@ -257,6 +257,11 @@ namespace mynamespace {
 
   void MyGui::keyPressEvent(QKeyEvent *event) {
     if (m_machine && !m_my_turn) return;
+    if (m_animation_timer->isActive()) {
+      m_animation_timer->stop();
+      resetGame();
+      return;
+    }
     if (event->key() == LEFT) {
       //move left
       updateCurrentRow(0);
@@ -302,8 +307,13 @@ namespace mynamespace {
 	    player = m_player_edit->toPlainText();
 	  else
 	    player = m_player_edit_B->toPlainText();
+	  
+	  if (!m_animation_timer->isActive()) {
+	    m_animation_timer->start(1000 / 3);
+	  }
+	  
 	  QMessageBox::information(this, player + " wins!!",
-				   "Close this dialog to start playing again.");
+				   "Close this dialog and press any key to start playing again.");
 	  if (m_current_player == YELLOW) {
 	    ++m_wins;
 	  } else {
@@ -312,7 +322,9 @@ namespace mynamespace {
 	  //update scores label
 	  m_scores->setText("Scores\n" + QString::number(m_wins) +
 			    "-" + QString::number(m_wins_B));
-	  resetGame();
+	  m_rem_secs = 10;
+	  m_remaining->setText(m_secs + QString::number(m_rem_secs));
+	  m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
 	} else {
 	  //switch player and reset position
 	  switchPlayer();
@@ -762,8 +774,11 @@ namespace mynamespace {
 	player = m_player_edit->toPlainText();
       else
 	player = m_player_edit_B->toPlainText();
+      if (!m_animation_timer->isActive()) {
+	m_animation_timer->start(1000 / 3);
+      }
       QMessageBox::information(this, player + " wins!!",
-			       "Close this dialog to start playing again.");
+			       "Close this dialog and press any key to start playing again.");
       if (m_current_player == YELLOW) {
 	++m_wins;
       } else {
@@ -774,11 +789,10 @@ namespace mynamespace {
 			"-" + QString::number(m_wins_B));
       if (m_timer->isActive())
 	m_timer->stop();
+      
       m_rem_secs = 10;
       m_remaining->setText(m_secs + QString::number(m_rem_secs));
       m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
-      resetGame();
-      
     } else {
       //and return control to user
       switchPlayer();
@@ -969,7 +983,7 @@ namespace mynamespace {
     //stop animation timer
     if (m_animation_timer->isActive()) {
       m_animation_timer->stop();
-      disconnect(m_animation_timer, SIGNAL(timeout()), this, SLOT(animationTimerOut()));
+      //disconnect(m_animation_timer, SIGNAL(timeout()), this, SLOT(animationTimerOut()));
     }
     
     //start timer if timer support is enabled
