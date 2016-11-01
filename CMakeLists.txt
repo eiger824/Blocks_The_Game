@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.2)
 project(blocks_the_game)
 find_package(Qt4 REQUIRED)
 
-
-
 INCLUDE(${QT_USE_FILE})
 
 # add definitions
@@ -39,8 +37,6 @@ target_link_libraries(blocks
   Qt4::QtXml
   )
 install(FILES
-	images/block.png
-	images/block2.png
 	images/blue.png
 	images/green.png
 	images/black.png

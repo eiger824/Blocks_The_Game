@@ -1010,7 +1010,7 @@ namespace mynamespace {
 	  } else if (m_locked_pos_B.contains(qMakePair(j,i))) {
 	    info(0, "[warning]Column "
 		 + QString::number(i)
-		 + " already taken by machine, skipping line...";
+		 + " already taken by machine, skipping line...");
 	    cnt = 0;
 	    break;
 	  }
@@ -1031,7 +1031,7 @@ namespace mynamespace {
 	  } else if (m_locked_pos_B.contains(qMakePair(j,i))) {
 	    info(0, "[warning]Row "
 		 + QString::number(j)
-		 + " already taken by machine, skipping...\n";
+		 + " already taken by machine, skipping...");
 	    cnt = 0;
 	    break;
 	  }

@@ -13,6 +13,13 @@ QString EASY = "easy";
 QString HARD = "hard";
 
 //list with colors
-QStringList COLORS = (QStringList() << "black.png" << "green.png" << "orange.png" << "red.png" << "blue.png" << "yellow.png" << "rosa.png");
+QStringList COLORS = (QStringList()
+		      << "black.png"
+		      << "green.png"
+		      << "orange.png"
+		      << "red.png"
+		      << "blue.png"
+		      << "yellow.png"
+		      << "rosa.png");
 
 
