@@ -90,12 +90,14 @@ namespace mynamespace {
     m_player = new QLabel("Player 1:");
     m_player_B = new QLabel("Player 2:");
     m_player_edit = new QTextEdit();
+    connect(m_player_edit, SIGNAL(textChanged()), this, SLOT(limitChar()));
     m_player_edit->setFixedHeight(30);
     m_player_edit->setStyleSheet("background-color: white; color: black;");
     m_player_edit->setTabChangesFocus(true);
     if (!player.isEmpty())
       m_player_edit->setText(player);
     m_player_edit_B = new QTextEdit();
+    connect(m_player_edit_B, SIGNAL(textChanged()), this, SLOT(limitChar()));
     m_player_edit_B->setFixedHeight(30);
     m_player_edit_B->setStyleSheet("background-color: white; color: black;");
     m_player_edit_B->setTabChangesFocus(true);
@@ -1041,6 +1043,41 @@ namespace mynamespace {
       m_remaining->setText(m_secs + "10");
     }
     info(0, "Timer is: " + QString::number(m_timer_enabled));
+  }
+
+  void MyGui::limitChar() {
+    QString text,textB;
+    if (m_machine) {
+      text = m_player_edit->toPlainText();
+      if (text.at(text.size()-1) == 10) {
+	text.chop(1);
+	m_player_edit->setText(text);
+	disconnect(m_player_edit, SIGNAL(textChanged()), this, SLOT(limitChar()));
+	resetGame();
+      } else if (text.size() > 40) {
+	text.chop(1);
+	m_player_edit->setText(text);
+      }
+    } else {
+      text = m_player_edit->toPlainText();
+      textB = m_player_edit_B->toPlainText();
+      if (textB.at(textB.size()-1) == 10) {
+	textB.chop(1);
+	m_player_edit_B->setText(textB);
+	disconnect(m_player_edit, SIGNAL(textChanged()), this, SLOT(limitChar()));
+	disconnect(m_player_edit_B, SIGNAL(textChanged()), this, SLOT(limitChar()));
+	resetGame();
+	return;
+      }
+      if (textB.size() > 40) {
+	textB.chop(1);
+	m_player_edit_B->setText(textB);
+      }
+      if (text.size() > 40) {
+	text.chop(1);
+	m_player_edit->setText(text);
+      }
+    }
   }
 
 } //mynamespace

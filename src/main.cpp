@@ -69,7 +69,6 @@ int main(int argc, char* argv[]) {
 	return help(1);
       }
     }
-   
     gui = new MyGui(debug,
 		    machine,
 		    level,

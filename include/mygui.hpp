@@ -36,6 +36,7 @@ namespace mynamespace {
     void resetGame();
     void enableDebug(int opt);
     void enableTimer(int opt);
+    void limitChar();
   private:
     void info(const int code, const QString& msg);
     void info();
