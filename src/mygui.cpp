@@ -829,6 +829,10 @@ namespace mynamespace {
 	//stop timer
 	if (m_timer->isActive())
 	  m_timer->stop();
+	//reset counter
+	m_rem_secs = 10;
+	m_remaining->setText(m_secs + QString::number(m_rem_secs));
+	m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
 	//and reset game
 	resetGame();
       }
