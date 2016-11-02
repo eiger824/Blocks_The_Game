@@ -54,8 +54,8 @@ namespace mynamespace {
     void printLocked();
     bool checkDiag();
     void switchPlayer();
-    bool isPossibleWin(bool &col, unsigned int &nr,
-		       bool me = false);
+    bool isPossibleWin(int &which, unsigned int &nr,
+		       bool me = false); //0->row, 1->col, 2->diag
   private:
     QVBoxLayout *m_main_layout;
     QVBoxLayout *m_intro;

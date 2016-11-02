@@ -232,7 +232,6 @@ namespace mynamespace {
   }
 
   void MyGui::keyPressEvent(QKeyEvent *event) {
-    std::cout << event->key() << std::endl;
     if (m_machine && !m_my_turn) return;
     if (m_animation_timer->isActive()) {
       if (!BLACKLIST.contains(event->key())) {
@@ -599,7 +598,7 @@ namespace mynamespace {
     unsigned int x = 0;
     unsigned int y = 0;
     bool found;
-    bool col;
+    int which;
     unsigned int n;
     if (m_level == EASY) {
       do {
@@ -610,10 +609,11 @@ namespace mynamespace {
       found = false;
       //1.) Ruin your oponent
       //See if player1 is about/on the way to make a win-move
-      if (isPossibleWin(col,n)) { //possible win for yellow
-	info(0, "*** POSSIBLE WIN ON ***[YELLOW]\n -> Col(1)/Row(0): " + QString::number(col));
+      if (isPossibleWin(which,n)) { //possible win for yellow
+	info(0, "*** POSSIBLE WIN ON ***[YELLOW]\n -> Diag(2)/Col(1)/Row(0): "
+	     + QString::number(which));
 	info(0, " -> Nr.: " + QString::number(n) + "\n***********************");
-	if (col) {
+	if (which == 1) {
 	  //machine will cut the column 'n'
 	  for (unsigned i=0; i < MAX_ROWS; ++i) {
 	    if (!isPosLocked(i,n)) {
@@ -623,7 +623,7 @@ namespace mynamespace {
 	      break;
 	    }
 	  }
-	} else {
+	} else if (which == 0) {
 	  //machine will cut the row 'n'
 	  for (unsigned i=0; i < MAX_COLS; ++i) {
 	    if (!isPosLocked(n,i)) {
@@ -633,13 +633,35 @@ namespace mynamespace {
 	      break;
 	    }
 	  }
+	} else { //2
+	  //machine will cut the diagonal +/- according to 'n'
+	  if (n == 0) {
+	    for (unsigned i=0; i< MAX_ROWS; ++i) {
+	      if (!isPosLocked(i,i)) {
+		x = i;
+		y = i;
+		found = true;
+		break;
+	      }
+	    }
+	  } else {
+	    for (unsigned i=0; i< MAX_ROWS; ++i) {
+	      if (!isPosLocked(i,MAX_ROWS-1-i)) {
+		x = i;
+		y = MAX_ROWS-1-i;
+		found = true;
+		break;
+	      }
+	    }
+	  }
 	}
       } else {
 	//2.) Make your move
-	if (isPossibleWin(col,n,true)) { //possible win for machine
-	  info(0, "*** POSSIBLE WIN ON ***[machine]\n -> Col(1)/Row(0): " + QString::number(col));
+	if (isPossibleWin(which,n,true)) { //possible win for machine
+	  info(0, "*** POSSIBLE WIN ON ***[machine]\n -> Diag(2)/Col(1)/Row(0): "
+	       + QString::number(which));
 	  info(0, " -> Nr.: " + QString::number(n) + "\n***********************");
-	  if (col) {
+	  if (which == 1) {
 	    for (unsigned i=0; i < MAX_ROWS; ++i) {
 	      if (!isPosLocked(i,n)) {
 		x = i;
@@ -648,13 +670,34 @@ namespace mynamespace {
 		break;
 	      }
 	    }
-	  } else {
+	  } else if (which == 0) {
 	    for (unsigned i=0; i < MAX_COLS; ++i) {
 	      if (!isPosLocked(n,i)) {
 		x = n;
 		y = i;
 		found = true;
 		break;
+	      }
+	    }
+	  } else {
+	    //machine will cut the diagonal +/- according to 'n'
+	    if (n == 0) {
+	      for (unsigned i=0; i< MAX_ROWS; ++i) {
+		if (!isPosLocked(i,i)) {
+		  x = i;
+		  y = i;
+		  found = true;
+		  break;
+		}
+	      }
+	    } else {
+	      for (unsigned i=0; i< MAX_ROWS; ++i) {
+		if (!isPosLocked(i,MAX_ROWS-1-i)) {
+		  x = i;
+		  y = MAX_ROWS-1-i;
+		  found = true;
+		  break;
+		}
 	      }
 	    }
 	  }
@@ -994,8 +1037,14 @@ namespace mynamespace {
     updateLabels();
   }
 
-  bool MyGui::isPossibleWin(bool &col, unsigned int &nr, bool me) {
+  bool MyGui::isPossibleWin(int &which, unsigned int &nr, bool me) {
     //function that will check if players YELLOW or machine are on the way to win
+    /* 
+       "which" will be assigned either:
+          0: if possible win on row
+	  1: if possible win on column
+	  2: if possible win on diagonal
+     */
     //check columns
     unsigned cnt=0;
     if (!me) { //possible win for YELLOW player
@@ -1013,7 +1062,7 @@ namespace mynamespace {
 	} //--> end of column 
 	//when column i is completed, compute counter
 	if (cnt > 1) {
-	  col = true;
+	  which = 1;
 	  nr = i;
 	  return true;
 	}
@@ -1034,12 +1083,45 @@ namespace mynamespace {
 	}
 	//when row j is completed, compute counter
 	if (cnt > 1) {
-	  col = false;
+	  which = 0;
 	  nr = j;
 	  return true;
 	}
 	cnt = 0;
       }
+      cnt = 0;
+      //check diagonal +
+      for (unsigned i=0; i<MAX_ROWS; ++i) {
+	if (m_locked_pos.contains(qMakePair(i,i))) {
+	  ++cnt;
+	} else if (m_locked_pos_B.contains(qMakePair(i,i))) {
+	  info(0, "[warning]Diagonal already taken by machine, skipping...");
+	  cnt = 0;
+	  break;
+	}
+      }
+      if (cnt > 1) {
+	which = 2;
+	nr = 0; //indicates + diagonal
+	return true;
+      }
+      cnt = 0;
+      //check diagonal -
+      for (unsigned i=0; i<MAX_ROWS; ++i) {
+	if (m_locked_pos.contains(qMakePair(i,MAX_ROWS-1-i))) {
+	  ++cnt;
+	} else if (m_locked_pos_B.contains(qMakePair(i,MAX_ROWS-1-i))) {
+	  info(0, "[warning]Diagonal already taken by machine, skipping...");
+	  cnt = 0;
+	  break;
+	}
+      }
+      if (cnt > 1) {
+	which = 2;
+	nr = 1; //indicates + diagonal
+	return true;
+      }
+      cnt = 0;
       info(0, "Yellow player is no threat now. Retuning false");
     } else { //possible win for machine
       //check columns
@@ -1054,7 +1136,7 @@ namespace mynamespace {
 	  }
 	}
 	if (cnt > 1) {
-	  col = true;
+	  which = 1;
 	  nr = i;
 	  return true;
 	}
@@ -1072,12 +1154,44 @@ namespace mynamespace {
 	  }
 	}
 	if (cnt > 1) {
-	  col = false;
+	  which = 0;
 	  nr = j;
 	  return true;
 	}
 	cnt = 0;
       }
+      //check diagonal +
+      for (unsigned i=0; i<MAX_ROWS; ++i) {
+	if (m_locked_pos_B.contains(qMakePair(i,i))) {
+	  ++cnt;
+	} else if (m_locked_pos.contains(qMakePair(i,i))) {
+	  info(0, "[warning]Diagonal already taken by YELLOW player, skipping...");
+	  cnt = 0;
+	  break;
+	}
+      }
+      if (cnt > 1) {
+	which = 2;
+	nr = 0; //indicates + diagonal
+	return true;
+      }
+      cnt = 0;
+      //check diagonal -
+      for (unsigned i=0; i<MAX_ROWS; ++i) {
+	if (m_locked_pos_B.contains(qMakePair(i,MAX_ROWS-1-i))) {
+	  ++cnt;
+	} else if (m_locked_pos.contains(qMakePair(i,MAX_ROWS-1-i))) {
+	  info(0, "[warning]Diagonal already taken by YELLOW player, skipping...");
+	  cnt = 0;
+	  break;
+	}
+      }
+      if (cnt > 1) {
+	which = 2;
+	nr = 1; //indicates + diagonal
+	return true;
+      }
+      cnt = 0;
     }
     return false;
   }
