@@ -232,82 +232,88 @@ namespace mynamespace {
   }
 
   void MyGui::keyPressEvent(QKeyEvent *event) {
+    std::cout << event->key() << std::endl;
     if (m_machine && !m_my_turn) return;
     if (m_animation_timer->isActive()) {
-      m_animation_timer->stop();
-      resetGame();
-      return;
-    }
-    if (event->key() == LEFT) {
-      //move left
-      updateCurrentRow(0);
-      info();
-      updateLabels();
-    } else if (event->key() == RIGHT) {
-      //move right
-      updateCurrentRow(1);
-      info();
-      updateLabels();
-    } else if (event->key() == UP) {
-      //move up
-      updateCurrentCol(0);
-      info();
-      updateLabels();
-    } else if (event->key() == DOWN) {
-      //move down
-      updateCurrentCol(1);
-      info();
-      updateLabels();
-    } else if (event->key() == ESC ||
-	       event->key() == ENTER) {
-      //stop timer
-      if (m_timer_enabled) {
-	if (m_timer->isActive()) {
-	  m_timer->stop();
-	}
+      if (!BLACKLIST.contains(event->key())) {
+	m_animation_timer->stop();
+	resetGame();
+	return;
+      } else {
+	info(1, "Wrong key. Returning.");
       }
-      //save locket pos of current player to list
-      if (save2list()) {
-	if (m_current_player == YELLOW) {
-	  ++m_cnt;
-	  m_move_count->setText(m_info + QString::number(m_cnt));
-	} else {
-	  ++m_cnt_B;
-	  m_move_count_B->setText(m_info + QString::number(m_cnt_B));
-	} 
-	info(0, "Locking position (" + m_current_player + "): " + currentPair2String());
-	//check if win
-	if (checkIfWin()) {
-	  QString player;
-	  if (m_current_player == YELLOW)
-	    player = m_player_edit->toPlainText();
-	  else
-	    player = m_player_edit_B->toPlainText();
-	  
-	  if (!m_animation_timer->isActive()) {
-	    m_animation_timer->start(1000 / 3);
+    } else {
+      if (event->key() == LEFT) {
+	//move left
+	updateCurrentRow(0);
+	info();
+	updateLabels();
+      } else if (event->key() == RIGHT) {
+	//move right
+	updateCurrentRow(1);
+	info();
+	updateLabels();
+      } else if (event->key() == UP) {
+	//move up
+	updateCurrentCol(0);
+	info();
+	updateLabels();
+      } else if (event->key() == DOWN) {
+	//move down
+	updateCurrentCol(1);
+	info();
+	updateLabels();
+      } else if (event->key() == ESC ||
+		 event->key() == ENTER) {
+	//stop timer
+	if (m_timer_enabled) {
+	  if (m_timer->isActive()) {
+	    m_timer->stop();
 	  }
-	  
-	  QMessageBox::information(this, player + " wins!!",
-				   "Close this dialog and press any key to start playing again.");
+	}
+	//save locket pos of current player to list
+	if (save2list()) {
 	  if (m_current_player == YELLOW) {
-	    ++m_wins;
+	    ++m_cnt;
+	    m_move_count->setText(m_info + QString::number(m_cnt));
 	  } else {
-	    ++m_wins_B;
-	  }
-	  //update scores label
-	  m_scores->setText("Scores\n" + QString::number(m_wins) +
-			    "-" + QString::number(m_wins_B));
-	  m_rem_secs = 10;
-	  m_remaining->setText(m_secs + QString::number(m_rem_secs));
-	  m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
-	} else {
-	  //switch player and reset position
-	  switchPlayer();
-	  if (m_machine) {
-	    info(0, "Machine is playing.");
-	    m_my_turn = false;
-	    machinePlays();
+	    ++m_cnt_B;
+	    m_move_count_B->setText(m_info + QString::number(m_cnt_B));
+	  } 
+	  info(0, "Locking position (" + m_current_player + "): " + currentPair2String());
+	  //check if win
+	  if (checkIfWin()) {
+	    QString player;
+	    if (m_current_player == YELLOW)
+	      player = m_player_edit->toPlainText();
+	    else
+	      player = m_player_edit_B->toPlainText();
+	  
+	    if (!m_animation_timer->isActive()) {
+	      m_animation_timer->start(1000 / 3);
+	    }
+	  
+	    QMessageBox::information(this, player + " wins!!",
+				     "Close this dialog and press any key to start playing again.");
+	    if (m_current_player == YELLOW) {
+	      ++m_wins;
+	    } else {
+	      ++m_wins_B;
+	    }
+	    //update scores label
+	    m_scores->setText("Scores\n" + QString::number(m_wins) +
+			      "-" + QString::number(m_wins_B));
+	    m_rem_secs = 10;
+	    m_remaining->setText(m_secs + QString::number(m_rem_secs));
+	    m_remaining->setStyleSheet("background-color: white; color: black; font: arial 12px;");
+	  } else {
+	    //switch player and reset position
+	    switchPlayer();
+	    if (m_machine) {
+	      info(0, "Machine is playing.");
+	      m_my_turn = false;
+	      machinePlays();
+	    }
 	  }
 	}
       }
@@ -1109,7 +1115,7 @@ namespace mynamespace {
     } else {
       text = m_player_edit->toPlainText();
       textB = m_player_edit_B->toPlainText();
-      if (textB.at(textB.size()-1) == 10) {
+      if (textB.at(textB.size()-1) == 40) {
 	textB.chop(1);
 	m_player_edit_B->setText(textB);
 	disconnect(m_player_edit, SIGNAL(textChanged()), this, SLOT(limitChar()));
